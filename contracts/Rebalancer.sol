@@ -3,19 +3,18 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Registry.sol";
 
 contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
-    using Address for address;
-
     /**
      * @dev Distribution matrix defines what percentage
      * of the token will be stored in each position.
      * The last element of the matrix always responds about
      * the token percentage in vault reserve.
      */
+
+    address public poolToken;
 
     DataTypes.AdaptorCall[] public distributionMatrix;
     DataTypes.AdaptorCall[] public autocompoundMatrix;
@@ -24,7 +23,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address _asset,
         string memory _name,
         string memory _symbol
-    ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) {}
+    ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) {
+        poolToken = _asset;
+    }
 
     function setAutocompoundMatrix(
         DataTypes.AdaptorCall[] memory _newMatrix

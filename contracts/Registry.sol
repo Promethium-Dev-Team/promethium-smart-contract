@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Registry is Ownable {
     address[] public positions;
+    address[] public ibTokens;
+
     mapping(address => bool) isAdaptorSetup;
 
     event PositionAdded(address position, address admin);
@@ -15,10 +17,10 @@ contract Registry is Ownable {
         return positions;
     }
 
-    function addPosition(address position) public onlyOwner {
+    function addPosition(address position, bool ibToken) public onlyOwner {
         require(!isAdaptorSetup[position], "Already added");
 
-        positions.push(position);
+        ibToken ? ibTokens.push(position) : positions.push(position);
         isAdaptorSetup[position] = true;
 
         emit PositionAdded(position, msg.sender);
@@ -33,5 +35,9 @@ contract Registry is Ownable {
         positions.pop;
 
         emit PositionRemoved(index, msg.sender);
+    }
+
+    function _isTransactionAllowed(address adaptor) public view returns (bool) {
+        return isAdaptorSetup[adaptor];
     }
 }
