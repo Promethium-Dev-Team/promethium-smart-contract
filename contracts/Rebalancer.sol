@@ -52,17 +52,21 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         }
     }
 
-    function rebalance() external nonReentrant {
-        for (uint8 i = 0; i < autocompoundMatrix.length; ++i) {
-            address adaptor = autocompoundMatrix[i].adaptor;
-            adaptor.call(autocompoundMatrix[i].callData);
-        }
+    function harvest() external nonReentrant {
+        _executeTransactions(autocompoundMatrix);
     }
 
-    function harvest() external nonReentrant {
-        for (uint8 i = 0; i < distributionMatrix.length; ++i) {
-            address adaptor = distributionMatrix[i].adaptor;
-            adaptor.call(distributionMatrix[i].callData);
+    function rebalance() external nonReentrant {
+        _executeTransactions(distributionMatrix);
+    }
+
+    function _executeTransactions(
+        DataTypes.AdaptorCall[] memory _matrix
+    ) internal {
+        for (uint8 i = 0; i < _matrix.length; ++i) {
+            address adaptor = _matrix[i].adaptor;
+            (bool success, ) = adaptor.call(_matrix[i].callData);
+            require(success, "transaction failed");
         }
     }
 }
