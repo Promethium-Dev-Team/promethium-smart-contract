@@ -19,6 +19,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     DataTypes.AdaptorCall[] public distributionMatrix;
     DataTypes.AdaptorCall[] public autocompoundMatrix;
 
+    bool public distributionMatrixExecuted;
+    bool public autocompoundMatrixExecuted;
+
     constructor(
         address _asset,
         string memory _name,
@@ -27,37 +30,29 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         poolToken = _asset;
     }
 
-    function setAutocompoundMatrix(
-        DataTypes.AdaptorCall[] memory _newMatrix
+    function setMatrix(
+        DataTypes.AdaptorCall[] memory _newMatrix,
+        bool autocompound
     ) public onlyOwner {
-        delete autocompoundMatrix;
+        autocompound ? delete autocompoundMatrix : delete distributionMatrix;
         for (uint8 i = 0; i < _newMatrix.length; ++i) {
             require(
                 isAdaptorSetup[_newMatrix[i].adaptor],
                 "Adaptor is not whitelisted"
             );
-            autocompoundMatrix.push(_newMatrix[i]);
-        }
-    }
-
-    function setDistributionMatrix(
-        DataTypes.AdaptorCall[] memory _newMatrix
-    ) public onlyOwner {
-        delete distributionMatrix;
-        for (uint8 i = 0; i < _newMatrix.length; ++i) {
-            require(
-                isAdaptorSetup[_newMatrix[i].adaptor],
-                "Adaptor is not whitelisted"
-            );
-            distributionMatrix.push(_newMatrix[i]);
+            autocompound
+                ? autocompoundMatrix.push(_newMatrix[i])
+                : distributionMatrix.push(_newMatrix[i]);
         }
     }
 
     function harvest() external nonReentrant {
+        require(!distributionMatrixExecuted, "Matrix already executed");
         _executeTransactions(autocompoundMatrix);
     }
 
     function rebalance() external nonReentrant {
+        require(!distributionMatrixExecuted, "Matrix already executed");
         _executeTransactions(distributionMatrix);
     }
 
