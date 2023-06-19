@@ -48,7 +48,14 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function harvest() external nonReentrant {
         require(!distributionMatrixExecuted, "Matrix already executed");
+        uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
+        uint256 balanceAfter = totalAssets();
+
+        require(
+            balanceBefore < balanceAfter,
+            "Balance after should be greater"
+        );
     }
 
     function rebalance() external nonReentrant {
