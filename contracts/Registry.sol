@@ -10,8 +10,9 @@ contract Registry is Ownable {
 
     mapping(address => bool) isAdaptorSetup;
 
-    event PositionAdded(address position, address admin);
-    event PositionRemoved(uint256 index, address admin);
+    event AdaptorAdded(address position, bool ibToken, address admin);
+    event PositionRemoved(address position, address admin);
+    event IbTokenRemoved(address position, address admin);
 
     function getPositions() public view returns (address[] memory) {
         return positions;
@@ -23,18 +24,31 @@ contract Registry is Ownable {
         ibToken ? ibTokens.push(position) : positions.push(position);
         isAdaptorSetup[position] = true;
 
-        emit PositionAdded(position, msg.sender);
+        emit AdaptorAdded(position, ibToken, msg.sender);
     }
 
     function removePosition(uint256 index) public onlyOwner {
-        isAdaptorSetup[positions[index]] = false;
+        address positionAddress = positions[index];
+        isAdaptorSetup[positionAddress] = false;
 
         for (uint256 i = index; i < positions.length - 1; i++) {
             positions[i] = positions[i + 1];
         }
         positions.pop;
 
-        emit PositionRemoved(index, msg.sender);
+        emit PositionRemoved(positionAddress, msg.sender);
+    }
+
+    function removeIbToken(uint256 index) public onlyOwner {
+        address positionAddress = positions[index];
+        isAdaptorSetup[positionAddress] = false;
+
+        for (uint256 i = index; i < ibTokens.length - 1; i++) {
+            ibTokens[i] = ibTokens[i + 1];
+        }
+        ibTokens.pop;
+
+        emit IbTokenRemoved(positionAddress, msg.sender);
     }
 
     function _isTransactionAllowed(address adaptor) public view returns (bool) {
