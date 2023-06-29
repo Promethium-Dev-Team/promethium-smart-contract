@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./DataTypes.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./RBAC.sol";
 
-contract Registry is Ownable {
+contract Registry is RBAC {
     address[] public positions;
     address[] public ibTokens;
 
@@ -41,6 +42,10 @@ contract Registry is Ownable {
 
     function removeIbToken(uint256 index) public onlyOwner {
         address positionAddress = positions[index];
+        require(
+            IERC20(positionAddress).balanceOf(address(this)) == 0,
+            "IB token balance should be 0."
+        );
         isAdaptorSetup[positionAddress] = false;
 
         for (uint256 i = index; i < ibTokens.length - 1; i++) {
