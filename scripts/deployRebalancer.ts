@@ -22,6 +22,11 @@ let symbols: string[] = [
   "REB_ETH",
   "REB_ARB",
 ];
+let teamAddresses: string[] = [
+  "0xff5a640A3e5f5A1a3b08B0841e069e255f76D3C7", //frontend
+  "0x2e86Ca26217CBAACC34c91697d03B81D2b2d58bA", //smart contract dev
+  //backend
+];
 
 async function main() {
   for (let i = 0; i < assets.length; i++) {
@@ -32,6 +37,22 @@ async function main() {
       symbols[i]
     );
     console.log(rebalancer.address);
+    for (let j = 0; j < teamAddresses.length; j++) {
+      await rebalancer.grantRole(
+        await rebalancer.DEFAULT_ADMIN_ROLE(),
+        teamAddresses[j]
+      );
+
+      await rebalancer.grantRole(
+        await rebalancer.AUTOCOMPOUND_PROVIDER_ROLE(),
+        teamAddresses[j]
+      );
+
+      await rebalancer.grantRole(
+        await rebalancer.REBALANCE_PROVIDER_ROLE(),
+        teamAddresses[j]
+      );
+    }
   }
 }
 
