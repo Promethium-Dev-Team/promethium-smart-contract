@@ -2,10 +2,10 @@ import { ethers } from "hardhat";
 import { Contract, BigNumber, ContractFactory, providers } from "ethers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { RBAC__factory } from "../typechain-types";
 
 describe("Registry contract", async () => {
     let RBAC: Contract;
-    let RBACFactory: ContractFactory;
 
     let alice: SignerWithAddress;
     let bob: SignerWithAddress;
@@ -21,8 +21,7 @@ describe("Registry contract", async () => {
         AUTOCOMPOUND_PROVIDER_ROLE =
             "0x4155544f434f4d504f554e445f50524f56494445525f524f4c45000000000000";
         [owner, alice, bob, charlie] = await ethers.getSigners();
-        RBACFactory = await ethers.getContractFactory("RBAC");
-        RBAC = await RBACFactory.connect(owner).deploy();
+        RBAC = await new RBAC__factory(owner).deploy();
     });
 
     describe("Deployment", async () => {
