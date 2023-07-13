@@ -19,6 +19,10 @@ contract Registry is RBAC {
         return positions;
     }
 
+    function getIbTokens() public view returns (address[] memory) {
+        return ibTokens;
+    }
+
     function addPosition(address position, bool ibToken) public onlyOwner {
         require(!isAdaptorSetup[position], "Already added");
 
