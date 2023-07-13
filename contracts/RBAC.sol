@@ -4,6 +4,10 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract RBAC is AccessControl {
+    constructor() {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
     bytes32 public constant REBALANCE_PROVIDER_ROLE =
         0x524542414c414e43455f50524f56494445525f524f4c45000000000000000000;
     bytes32 public constant AUTOCOMPOUND_PROVIDER_ROLE =
