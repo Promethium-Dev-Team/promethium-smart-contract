@@ -104,8 +104,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function totalAssets() public view override returns (uint256) {
         uint256 _totalAssets = IERC20(asset()).balanceOf(address(this));
-        for (uint i = 0; i < ibTokens.length; i++) {
-            _totalAssets += IERC20(ibTokens[i]).balanceOf(address(this));
+        for (uint i = 0; i < iBTokens.length; i++) {
+            _totalAssets += IERC20(iBTokens[i]).balanceOf(address(this));
         }
         return _totalAssets;
     }
