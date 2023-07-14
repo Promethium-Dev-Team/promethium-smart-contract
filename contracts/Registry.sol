@@ -11,9 +11,10 @@ contract Registry is RBAC {
 
     mapping(address => bool) isAdaptorSetup;
 
-    event AdaptorAdded(address position, bool ibToken, address admin);
+    event PositionAdded(address position, address admin);
+    event IBTokenAdded(address token, address admin);
     event PositionRemoved(address position, address admin);
-    event IbTokenRemoved(address position, address admin);
+    event IBTokenRemoved(address position, address admin);
 
     function getPositions() public view returns (address[] memory) {
         return positions;
@@ -23,13 +24,13 @@ contract Registry is RBAC {
         return iBTokens;
     }
 
-    function addPosition(address position, bool ibToken) public onlyOwner {
+    function addPosition(address position) public onlyOwner {
         require(!isAdaptorSetup[position], "Already added");
 
-        ibToken ? iBTokens.push(position) : positions.push(position);
+        positions.push(position);
         isAdaptorSetup[position] = true;
 
-        emit AdaptorAdded(position, ibToken, msg.sender);
+        emit PositionAdded(position, msg.sender);
     }
 
     function removePosition(uint256 index) public onlyOwner {
@@ -42,6 +43,17 @@ contract Registry is RBAC {
         positions.pop;
 
         emit PositionRemoved(positionAddress, msg.sender);
+    }
+
+    function addIBToken(address token) public onlyOwner {
+        require(!isAdaptorSetup[token], "Already added");
+
+        IERC20(token).balanceOf(address(this));
+
+        iBTokens.push(token);
+        isAdaptorSetup[token] = true;
+
+        emit IBTokenAdded(token, msg.sender);
     }
 
     function removeIBToken(uint256 index) public onlyOwner {
@@ -57,7 +69,7 @@ contract Registry is RBAC {
         }
         iBTokens.pop;
 
-        emit IbTokenRemoved(positionAddress, msg.sender);
+        emit IBTokenRemoved(positionAddress, msg.sender);
     }
 
     function _isTransactionAllowed(address adaptor) public view returns (bool) {
