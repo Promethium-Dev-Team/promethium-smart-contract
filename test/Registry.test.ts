@@ -66,25 +66,25 @@ describe.only("Registry contract", async () => {
             "PIG"
         );
 
-        AaveIbToken = await new InterestBearning__factory(bob).deploy(
-            "AAVE_IB",
-            "AAVE"
+        AaveIbToken = InterestBearning__factory.connect(
+            await Aave.IBToken(),
+            charlie
         );
-        TenderIbToken = await new InterestBearning__factory(bob).deploy(
-            "Tender_IB",
-            "TENDER"
+        TenderIbToken = InterestBearning__factory.connect(
+            await Tender.IBToken(),
+            charlie
         );
-        DolomiteIbToken = await new InterestBearning__factory(bob).deploy(
-            "Dolomite_IB",
-            "DOLOM"
+        DolomiteIbToken = InterestBearning__factory.connect(
+            await Dolomite.IBToken(),
+            charlie
         );
-        ImpermaxIbToken = await new InterestBearning__factory(bob).deploy(
-            "Impermax_IB",
-            "IMPER"
+        ImpermaxIbToken = InterestBearning__factory.connect(
+            await Impermax.IBToken(),
+            charlie
         );
-        WePiggyIbToken = await new InterestBearning__factory(bob).deploy(
-            "WEPIGGY_IB",
-            "PIG"
+        WePiggyIbToken = InterestBearning__factory.connect(
+            await WePiggy.IBToken(),
+            charlie
         );
 
         notOwnerRevertString = "Caller is not the owner";
@@ -115,33 +115,97 @@ describe.only("Registry contract", async () => {
     });
 
     describe("Add position function", async () => {
-        it("Should revert when not the owner is trying to set the new position", async () => {
+        it("Should revert when not the owner is trying to set a new position", async () => {
             await expect(
-                Registry.connect(alice).addPosition(USDT.address, false)
+                Registry.connect(alice).addPosition(USDT.address)
             ).to.be.revertedWith(notOwnerRevertString);
         });
 
         it("Should revert if the adaptor is already added", async () => {
-            await Registry.connect(owner).addPosition(USDT.address, false);
+            await Registry.connect(owner).addPosition(USDT.address);
 
             await expect(
-                Registry.connect(owner).addPosition(USDT.address, false)
+                Registry.connect(owner).addPosition(USDT.address)
             ).to.be.revertedWith(allreadyAddedPositionRevertString);
         });
 
         it("Should add a non ib position", async () => {
-            await Registry.connect(owner).addPosition(USDT.address, false);
+            await Registry.connect(owner).addPosition(USDT.address);
             expect((await Registry.getPositions())[0]).to.equal(USDT.address);
         });
 
-        it("Should add an ib position", async () => {
-            await Registry.connect(owner).addPosition(
-                AaveIbToken.address,
-                true
+        it("Should add an array of non ib positions", async () => {
+            let positionsAmount = 6;
+            await Registry.connect(owner).addPosition(USDT.address);
+            await Registry.connect(owner).addPosition(Aave.address);
+            await Registry.connect(owner).addPosition(Tender.address);
+            await Registry.connect(owner).addPosition(Dolomite.address);
+            await Registry.connect(owner).addPosition(Impermax.address);
+            await Registry.connect(owner).addPosition(WePiggy.address);
+
+            expect((await Registry.getPositions()).length).to.equal(
+                positionsAmount
             );
+        });
+
+        it("Should emit an event after adding a position", async () => {
+            await expect(Registry.connect(owner).addPosition(USDT.address))
+                .to.emit(Registry, "PositionAdded")
+                .withArgs(USDT.address, owner.address);
+        });
+    });
+
+    describe("Remove position function", async () => {
+        it("Should remove the position from allowed adaptors list", async () => {
+            await Registry.connect(owner).addPosition(Aave.address);
+            await Registry.connect(owner).removePosition(ethers.constants.Zero);
+            expect((await Registry.getPositions()).length).to.equal(
+                ethers.constants.Zero
+            );
+        });
+    });
+
+    describe("AddIBToken function", async () => {
+        it("Should revert when not the owner is trying to set a new IB token", async () => {
+            await expect(
+                Registry.connect(alice).addIBToken(AaveIbToken.address)
+            ).to.be.revertedWith(notOwnerRevertString);
+        });
+
+        it("Should revert if the adaptor is already added", async () => {
+            await Registry.connect(owner).addIBToken(AaveIbToken.address);
+
+            await expect(
+                Registry.connect(owner).addIBToken(AaveIbToken.address)
+            ).to.be.revertedWith(allreadyAddedPositionRevertString);
+        });
+
+        it("Should add an ib position", async () => {
+            await Registry.connect(owner).addIBToken(AaveIbToken.address);
             expect((await Registry.getIBTokens())[0]).to.equal(
                 AaveIbToken.address
             );
+        });
+
+        it("Should add an array of non ib positions", async () => {
+            let positionsAmount = 5;
+            await Registry.connect(owner).addIBToken(AaveIbToken.address);
+            await Registry.connect(owner).addIBToken(TenderIbToken.address);
+            await Registry.connect(owner).addIBToken(DolomiteIbToken.address);
+            await Registry.connect(owner).addIBToken(ImpermaxIbToken.address);
+            await Registry.connect(owner).addIBToken(WePiggyIbToken.address);
+
+            expect((await Registry.getIBTokens()).length).to.equal(
+                positionsAmount
+            );
+        });
+
+        it("Should emit an event after adding a position", async () => {
+            await expect(
+                Registry.connect(owner).addIBToken(AaveIbToken.address)
+            )
+                .to.emit(Registry, "IBTokenAdded")
+                .withArgs(AaveIbToken.address, owner.address);
         });
     });
 });
