@@ -9,7 +9,7 @@ contract Registry is RBAC {
     address[] public positions;
     address[] public iBTokens;
 
-    mapping(address => bool) isAdaptorSetup;
+    mapping(address => bool) public isAdaptorSetup;
 
     event PositionAdded(address position, address admin);
     event IBTokenAdded(address token, address admin);
@@ -70,9 +70,5 @@ contract Registry is RBAC {
         iBTokens.pop;
 
         emit IBTokenRemoved(positionAddress, msg.sender);
-    }
-
-    function _isTransactionAllowed(address adaptor) public view returns (bool) {
-        return isAdaptorSetup[adaptor];
     }
 }
