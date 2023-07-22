@@ -30,6 +30,21 @@ export default {
             accounts: [process.env.PRIVATE_KEY],
             chainId: 42161,
         },
+        arbitrumAlchemy: {
+            url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_PROJECT_ID}`,
+            accounts: [process.env.PRIVATE_KEY],
+            chainId: 42161,
+        },
+        arbitrumQuickNode: {
+            url: `https://dark-boldest-panorama.arbitrum-mainnet.discover.quiknode.pro/${process.env.QUICKNODE_PROJECT_ID}`,
+            accounts: [process.env.PRIVATE_KEY],
+            chainId: 42161,
+        },
+        arbitrumInfuraExtra: {
+            url: `https://arb1.arbitrum.io/rpc`,
+            accounts: [process.env.PRIVATE_KEY],
+            chainId: 42161,
+        },
     },
     etherscan: {
         apiKey: {
