@@ -9,3 +9,7 @@ typechain-types
 cache
 artifacts
 
+arbitrumUSDTBorrow.csv
+arbitrumBTC.csv
+arbitrumUSDC.csv
+arbitrumETH.csv
