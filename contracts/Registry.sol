@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./DataTypes.sol";
 import "./RBAC.sol";
+import "hardhat/console.sol";
 
 contract Registry is RBAC {
     address[] public positions;
@@ -36,11 +37,10 @@ contract Registry is RBAC {
     function removePosition(uint256 index) public onlyOwner {
         address positionAddress = positions[index];
         isAdaptorSetup[positionAddress] = false;
-
         for (uint256 i = index; i < positions.length - 1; i++) {
             positions[i] = positions[i + 1];
         }
-        positions.pop;
+        positions.pop();
 
         emit PositionRemoved(positionAddress, msg.sender);
     }
@@ -67,7 +67,7 @@ contract Registry is RBAC {
         for (uint256 i = index; i < iBTokens.length - 1; i++) {
             iBTokens[i] = iBTokens[i + 1];
         }
-        iBTokens.pop;
+        iBTokens.pop();
 
         emit IBTokenRemoved(positionAddress, msg.sender);
     }

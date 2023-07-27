@@ -155,10 +155,11 @@ describe.only("Registry contract", async () => {
         });
     });
 
-    describe("Remove position function", async () => {
+    describe.only("Remove position function", async () => {
         it("Should remove the position from allowed adaptors list", async () => {
             await Registry.connect(owner).addPosition(Aave.address);
             await Registry.connect(owner).removePosition(ethers.constants.Zero);
+
             expect((await Registry.getPositions()).length).to.equal(
                 ethers.constants.Zero
             );
