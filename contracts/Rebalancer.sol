@@ -23,6 +23,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         DataTypes.AdaptorCall[] _newMatrix
     );
 
+    event FeesChanged(address owner, DataTypes.feeData newFeeData);
     DataTypes.feeData public FeeData;
     address public poolToken;
 
@@ -125,5 +126,19 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             _totalAssets += IERC20(iBTokens[i]).balanceOf(address(this));
         }
         return _totalAssets;
+    }
+
+    function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
+        require(
+            newFeeData.platformFee <= MAX_PLATFORM_FEE,
+            "Platform fee limit exceeded."
+        );
+        require(
+            newFeeData.withDrawFee <= MAX_WITHDRAW_FEE,
+            "Withdraw fee limit exceeded."
+        );
+        FeeData = newFeeData;
+
+        emit FeesChanged(msg.sender, newFeeData);
     }
 }
