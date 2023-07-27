@@ -23,6 +23,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         DataTypes.AdaptorCall[] _newMatrix
     );
 
+    DataTypes.feeData public FeeData;
     address public poolToken;
 
     DataTypes.AdaptorCall[] public distributionMatrix;
@@ -31,12 +32,23 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     bool public distributionMatrixExecuted;
     bool public autocompoundMatrixExecuted;
 
+    uint64 public MAX_PLATFORM_FEE = 0.3 * 1e18;
+    uint64 public MAX_WITHDRAW_FEE = 0.05 * 1e18;
+    uint256 public constant feeDecimals = 18;
+
     constructor(
         address _asset,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        address _treasury
     ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) {
         poolToken = _asset;
+
+        FeeData = DataTypes.feeData({
+            platformFee: 0.05 * 1e18,
+            withDrawFee: 0.0001 * 1e18,
+            treasury: _treasury
+        });
     }
 
     function setDistributionMatrix(
@@ -82,6 +94,11 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         require(
             balanceBefore < balanceAfter,
             "Balance after should be greater"
+        );
+        IERC20(poolToken).transfer(
+            FeeData.treasury,
+            (((balanceAfter - balanceBefore) * FeeData.platformFee) / 10) ^
+                feeDecimals
         );
         autocompoundMatrixExecuted = true;
     }

@@ -12,4 +12,10 @@ library DataTypes {
         address adaptor;
         bytes callData;
     }
+
+    struct feeData {
+        uint64 platformFee;
+        uint64 withDrawFee;
+        address treasury;
+    }
 }
