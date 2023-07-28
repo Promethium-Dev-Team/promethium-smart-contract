@@ -6,35 +6,34 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Registry.sol";
 
 contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
-    /**
-     * @dev Distribution matrix defines what percentage
-     * of the token will be stored in each position.
-     * The last element of the matrix always responds about
-     * the token percentage in vault reserve.
-     */
-
     event DistributionMatrixUpdated(
         address provider,
         DataTypes.AdaptorCall[] _newMatrix
     );
-
     event AutocompoundMatrixUpdated(
         address provider,
         DataTypes.AdaptorCall[] _newMatrix
     );
-
+    event Harvest(address caller, uint256 totalIncome, uint256 platformFee);
+    event Rebalance(address caller);
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
-    DataTypes.feeData public FeeData;
-    address public poolToken;
+    event FeesCharged(address treasury, uint256 amount);
+    event RequestWithdraw(address withdrawer, uint256 amount);
 
+    DataTypes.feeData public FeeData;
     DataTypes.AdaptorCall[] public distributionMatrix;
     DataTypes.AdaptorCall[] public autocompoundMatrix;
 
     bool public distributionMatrixExecuted;
     bool public autocompoundMatrixExecuted;
 
-    uint64 public MAX_PLATFORM_FEE = 0.3 * 1e18;
-    uint64 public MAX_WITHDRAW_FEE = 0.05 * 1e18;
+    address public poolToken;
+    DataTypes.withdrawRequest[] public withdrawQueue;
+    uint256 public totalRequested;
+
+    uint64 public constant MAX_PLATFORM_FEE = 0.3 * 1e18;
+    uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
+    uint256 public constant WITHDRAW_QUEUE_LIMIT = 10;
     uint256 public constant feeDecimals = 18;
 
     constructor(
@@ -47,7 +46,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
         FeeData = DataTypes.feeData({
             platformFee: 0.05 * 1e18,
-            withDrawFee: 0.0001 * 1e18,
+            withdrawFee: 0.0001 * 1e18,
             treasury: _treasury
         });
     }
@@ -91,23 +90,36 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
         uint256 balanceAfter = totalAssets();
-
+        uint256 totalIncome = balanceAfter - balanceBefore;
         require(
             balanceBefore < balanceAfter,
             "Balance after should be greater"
         );
-        IERC20(poolToken).transfer(
-            FeeData.treasury,
-            (((balanceAfter - balanceBefore) * FeeData.platformFee) / 10) ^
-                feeDecimals
-        );
+        uint256 totalFee = (totalIncome * FeeData.platformFee) /
+            (10 ^ feeDecimals);
+        _payFee(totalFee);
         autocompoundMatrixExecuted = true;
+
+        emit Harvest(msg.sender, totalIncome, totalFee);
     }
 
     function rebalance() external nonReentrant {
         require(!distributionMatrixExecuted, "Matrix already executed");
         _executeTransactions(distributionMatrix);
         distributionMatrixExecuted = true;
+
+        for (uint256 i = 0; i < withdrawQueue.length; i++) {
+            uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) /
+                (10 ^ feeDecimals);
+            _payFee(fee);
+            IERC20(poolToken).transfer(
+                withdrawQueue[i].receiver,
+                withdrawQueue[i].amount - fee
+            );
+        }
+        delete withdrawQueue;
+        totalRequested = 0;
+        emit Rebalance(msg.sender);
     }
 
     function _executeTransactions(
@@ -125,6 +137,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         for (uint i = 0; i < iBTokens.length; i++) {
             _totalAssets += IERC20(iBTokens[i]).balanceOf(address(this));
         }
+        _totalAssets -= totalRequested;
         return _totalAssets;
     }
 
@@ -134,11 +147,77 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             "Platform fee limit exceeded."
         );
         require(
-            newFeeData.withDrawFee <= MAX_WITHDRAW_FEE,
+            newFeeData.withdrawFee <= MAX_WITHDRAW_FEE,
             "Withdraw fee limit exceeded."
         );
         FeeData = newFeeData;
 
         emit FeesChanged(msg.sender, newFeeData);
+    }
+
+    function redeem(
+        uint256 shares,
+        address receiver,
+        address owner
+    ) public override returns (uint256) {
+        require(shares <= maxRedeem(owner), "ERC4626: redeem more than max");
+
+        uint256 assets = previewRedeem(shares);
+
+        uint256 withdrawFee = (assets * FeeData.withdrawFee) /
+            (10 ^ feeDecimals);
+
+        _payFee(withdrawFee);
+        _withdraw(_msgSender(), receiver, owner, assets - withdrawFee, shares);
+
+        return assets;
+    }
+
+    function withdraw(
+        uint256 assets,
+        address receiver,
+        address owner
+    ) public override returns (uint256) {
+        require(
+            assets <= maxWithdraw(owner),
+            "ERC4626: withdraw more than max"
+        );
+
+        uint256 shares = previewWithdraw(assets);
+        uint256 withdrawFee = (assets * FeeData.withdrawFee) /
+            (10 ^ feeDecimals);
+        _payFee(withdrawFee);
+        _withdraw(_msgSender(), receiver, owner, assets - withdrawFee, shares);
+
+        return shares;
+    }
+
+    function requestWithdraw(uint256 assets) public {
+        require(
+            assets <= maxWithdraw(msg.sender),
+            "ERC4626: withdraw more than max"
+        );
+        require(
+            assets > IERC20(poolToken).balanceOf(address(this)),
+            "Instant withdraw is available"
+        );
+        require(
+            withdrawQueue.length < WITHDRAW_QUEUE_LIMIT,
+            "Withdraw queue limit exceeded."
+        );
+
+        uint256 shares = previewWithdraw(assets);
+
+        _burn(msg.sender, shares);
+        totalRequested += assets;
+        withdrawQueue.push(DataTypes.withdrawRequest(msg.sender, assets));
+
+        emit RequestWithdraw(msg.sender, assets);
+    }
+
+    function _payFee(uint256 amount) internal {
+        IERC20(poolToken).transfer(FeeData.treasury, amount);
+
+        emit FeesCharged(FeeData.treasury, amount);
     }
 }
