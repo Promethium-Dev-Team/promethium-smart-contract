@@ -25,7 +25,7 @@ let symbols: string[] = [
 ];
 let teamAddresses: string[] = [
   "0xff5a640A3e5f5A1a3b08B0841e069e255f76D3C7", //frontend
-  "0x2e86Ca26217CBAACC34c91697d03B81D2b2d58bA", //smart contract dev
+  "0xcf80E4DA97b160c8abEDF61BfaBb62D42b9aAe17", //smart contract dev
   "0x62454346aF26ad476b811dF784f6aBa9B77C9b39", //backend
 ];
 let treasury: string = "0xBAD3866bE77aedBD8C559Ad0A74dBad95161592e";
@@ -70,11 +70,26 @@ let creditProtocolMocks: string[][] = [
 async function main() {
   for (let i = 0; i < assets.length; i++) {
     const [signer] = await ethers.getSigners();
+    let positions: string[] = [];
+    let ibTokens: string[] = [];
+
+    for (let j = 0; j < creditProtocolMocks[i].length; j++) {
+      positions.push(creditProtocolMocks[i][j]);
+      let creditProtocol = CreditProtocol__factory.connect(
+        creditProtocolMocks[i][j],
+        signer
+      );
+      ibTokens.push(await creditProtocol.IBToken());
+    }
+    positions.push(assets[i]);
+
     const rebalancer = await new Rebalancer__factory(signer).deploy(
       assets[i],
       names[i],
       symbols[i],
-      treasury
+      treasury,
+      positions,
+      ibTokens
     );
 
     console.log(names[i]);
@@ -95,15 +110,6 @@ async function main() {
         teamAddresses[j]
       );
     }
-    for (let j = 0; j < creditProtocolMocks[i].length; j++) {
-      await rebalancer.addPosition(creditProtocolMocks[i][j]);
-      let creditProtocol = CreditProtocol__factory.connect(
-        creditProtocolMocks[i][j],
-        signer
-      );
-      await rebalancer.addIBToken(await creditProtocol.IBToken());
-    }
-    await rebalancer.addPosition(assets[i]);
   }
 }
 

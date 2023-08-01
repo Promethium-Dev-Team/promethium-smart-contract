@@ -40,7 +40,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address _asset,
         string memory _name,
         string memory _symbol,
-        address _treasury
+        address _treasury,
+        address[] memory _positions,
+        address[] memory _iBTokens
     ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) {
         poolToken = _asset;
 
@@ -49,6 +51,14 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             withdrawFee: 0.0001 * 1e18,
             treasury: _treasury
         });
+
+        for (uint i = 0; i < _positions.length; i++) {
+            addPosition(_positions[i]);
+        }
+
+        for (uint i = 0; i < _iBTokens.length; i++) {
+            addIBToken(_iBTokens[i]);
+        }
     }
 
     function setDistributionMatrix(
