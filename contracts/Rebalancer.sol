@@ -96,7 +96,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             "Balance after should be greater"
         );
         uint256 totalFee = (totalIncome * FeeData.platformFee) /
-            (10 ^ feeDecimals);
+            (10 ** feeDecimals);
         _payFee(totalFee);
         autocompoundMatrixExecuted = true;
 
@@ -110,7 +110,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
             uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) /
-                (10 ^ feeDecimals);
+                (10 ** feeDecimals);
             _payFee(fee);
             IERC20(poolToken).transfer(
                 withdrawQueue[i].receiver,
@@ -165,7 +165,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 assets = previewRedeem(shares);
 
         uint256 withdrawFee = (assets * FeeData.withdrawFee) /
-            (10 ^ feeDecimals);
+            (10 ** feeDecimals);
 
         _payFee(withdrawFee);
         _withdraw(_msgSender(), receiver, owner, assets - withdrawFee, shares);
@@ -185,7 +185,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
         uint256 shares = previewWithdraw(assets);
         uint256 withdrawFee = (assets * FeeData.withdrawFee) /
-            (10 ^ feeDecimals);
+            (10 ** feeDecimals);
         _payFee(withdrawFee);
         _withdraw(_msgSender(), receiver, owner, assets - withdrawFee, shares);
 
