@@ -233,8 +233,10 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     }
 
     function _payFee(uint256 amount) internal {
-        IERC20(poolToken).transfer(FeeData.treasury, amount);
+        if (amount > 0) {
+            IERC20(poolToken).transfer(FeeData.treasury, amount);
 
-        emit FeesCharged(FeeData.treasury, amount);
+            emit FeesCharged(FeeData.treasury, amount);
+        }
     }
 }
