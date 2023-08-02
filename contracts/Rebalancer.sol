@@ -115,8 +115,15 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function rebalance() external nonReentrant {
         require(!distributionMatrixExecuted, "Matrix already executed");
+        uint256 balanceBefore = totalAssets();
         _executeTransactions(distributionMatrix);
         distributionMatrixExecuted = true;
+
+        uint256 balanceAfter = totalAssets();
+        uint256 totalIncome = balanceAfter - balanceBefore;
+        uint256 totalFee = (totalIncome * FeeData.platformFee) /
+            (10 ** feeDecimals);
+        _payFee(totalFee);
 
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
             uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) /
