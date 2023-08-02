@@ -142,34 +142,34 @@ export const getDForceRate = async (currentBlockNumber: number) => {
     return ratePerSecond;
 };
 
-async function main() {
-    let currentBlockNumber = (await ethers.provider.getBlock("latest")).number;
-    console.log(
-        ((await getAAVEV3Rate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-    console.log(
-        ((await getRadiantV1Rate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-    console.log(
-        ((await getTenderRate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-    console.log(
-        ((await getDolomiteRate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-    console.log(
-        ((await getWePiggyRate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-    console.log(
-        ((await getRadiantV2Rate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-    console.log(
-        ((await getDForceRate(currentBlockNumber)) * secondsPerYear) / 1e16
-    );
-}
+// async function main() {
+//     let currentBlockNumber = (await ethers.provider.getBlock("latest")).number;
+//     console.log(
+//         ((await getAAVEV3Rate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+//     console.log(
+//         ((await getRadiantV1Rate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+//     console.log(
+//         ((await getTenderRate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+//     console.log(
+//         ((await getDolomiteRate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+//     console.log(
+//         ((await getWePiggyRate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+//     console.log(
+//         ((await getRadiantV2Rate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+//     console.log(
+//         ((await getDForceRate(currentBlockNumber)) * secondsPerYear) / 1e16
+//     );
+// }
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error);
-        process.exit(1);
-    });
+// main()
+//     .then(() => process.exit(0))
+//     .catch((error) => {
+//         console.error(error);
+//         process.exit(1);
+//     });

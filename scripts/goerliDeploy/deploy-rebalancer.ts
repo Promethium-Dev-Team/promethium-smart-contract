@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
-import { Rebalancer__factory } from "../typechain-types";
-import { CreditProtocol__factory } from "../typechain-types";
+import { Rebalancer__factory } from "../../typechain-types";
+import { CreditProtocol__factory } from "../../typechain-types";
 
 let assets: string[] = [
   "0x8F5C817bd07D7A297E7C3D95d68C2c3eB18fbD89",

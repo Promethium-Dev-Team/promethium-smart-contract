@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
-import { Rebalancer__factory } from "../typechain-types";
-import { ERC20__factory } from "../typechain-types";
-import { CreditProtocol__factory } from "../typechain-types";
+import { Rebalancer__factory } from "../../typechain-types";
+import { ERC20__factory } from "../../typechain-types";
+import { CreditProtocol__factory } from "../../typechain-types";
 
 let rebalancerAddress: string = "0xD793AF38a1F499bf0447Fc93b9f4e8b557827438";
 let usdtAddress: string = "0x8F5C817bd07D7A297E7C3D95d68C2c3eB18fbD89";
@@ -40,10 +40,10 @@ async function main() {
 
     //adding positions
     for (let i = 0; i < positionsAddresses.length; i++) {
-        (await rebalancer.addPosition(positionsAddresses[i], false)).wait();
+        (await rebalancer.addPosition(positionsAddresses[i])).wait();
     }
 
-    await (await rebalancer.addPosition(usdt.address, false)).wait();
+    await (await rebalancer.addPosition(usdt.address)).wait();
 
     const data = [];
 

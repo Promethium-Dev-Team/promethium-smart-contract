@@ -1,5 +1,5 @@
 import {ethers} from "hardhat";
-import {ERC20token__factory} from "../typechain-types";
+import {ERC20token__factory} from "../../typechain-types";
 
 let names: string[] = ["Tether USD", "USD Coin", "Bitcoin token", "Ethereum", "ARB"];
 let symbols: string[] = ["USDT", "USDC", "BTC", "ETH", "ARB"];
