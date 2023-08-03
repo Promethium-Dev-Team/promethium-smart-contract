@@ -14,7 +14,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address provider,
         DataTypes.AdaptorCall[] _newMatrix
     );
-    event Harvest(address caller, uint256 totalIncome, uint256 platformFee);
+    event Harvest(address caller, uint256 totalIncome);
     event Rebalance(address caller);
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
     event FeesCharged(address treasury, uint256 amount);
@@ -30,6 +30,10 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     address public poolToken;
     DataTypes.withdrawRequest[] public withdrawQueue;
     uint256 public totalRequested;
+
+    uint256 lastBalance;
+    uint256 depositsAfterFeeClaim;
+    uint256 withdrawalsAfterFeeClaim;
 
     uint64 public constant MAX_PLATFORM_FEE = 0.3 * 1e18;
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
@@ -104,30 +108,19 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
         uint256 balanceAfter = totalAssets();
-        uint256 totalIncome = balanceAfter - balanceBefore;
         require(
             balanceBefore < balanceAfter,
             "Balance after should be greater"
         );
-        uint256 totalFee = (totalIncome * FeeData.platformFee) /
-            (10 ** feeDecimals);
-        _payFee(totalFee);
         autocompoundMatrixExecuted = true;
 
-        emit Harvest(msg.sender, totalIncome, totalFee);
+        emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
 
     function rebalance() external nonReentrant {
         require(!distributionMatrixExecuted, "Matrix already executed");
-        uint256 balanceBefore = totalAssets();
         _executeTransactions(distributionMatrix);
         distributionMatrixExecuted = true;
-
-        uint256 balanceAfter = totalAssets();
-        uint256 totalIncome = balanceAfter - balanceBefore;
-        uint256 totalFee = (totalIncome * FeeData.platformFee) /
-            (10 ** feeDecimals);
-        _payFee(totalFee);
 
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
             uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) /
@@ -153,13 +146,18 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         }
     }
 
-    function totalAssets() public view override returns (uint256) {
+    function totalAssetsWithoutFee() private view returns (uint256) {
         uint256 _totalAssets = IERC20(asset()).balanceOf(address(this));
         for (uint i = 0; i < iBTokens.length; i++) {
             _totalAssets += IERC20(iBTokens[i]).balanceOf(address(this));
         }
         _totalAssets -= totalRequested;
+
         return _totalAssets;
+    }
+
+    function totalAssets() public view override returns (uint256) {
+        return totalAssetsWithoutFee() - getAvailableFee();
     }
 
     function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
@@ -184,6 +182,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         require(shares <= maxRedeem(owner), "ERC4626: redeem more than max");
 
         uint256 assets = previewRedeem(shares);
+        withdrawalsAfterFeeClaim += assets;
 
         uint256 withdrawFee = (assets * FeeData.withdrawFee) /
             (10 ** feeDecimals);
@@ -203,6 +202,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             assets <= maxWithdraw(owner),
             "ERC4626: withdraw more than max"
         );
+        withdrawalsAfterFeeClaim += assets;
 
         uint256 shares = previewWithdraw(assets);
         uint256 withdrawFee = (assets * FeeData.withdrawFee) /
@@ -227,6 +227,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             "Withdraw queue limit exceeded."
         );
 
+        withdrawalsAfterFeeClaim += assets;
+
         uint256 shares = previewWithdraw(assets);
 
         _burn(msg.sender, shares);
@@ -242,5 +244,31 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
             emit FeesCharged(FeeData.treasury, amount);
         }
+    }
+
+    function getAvailableFee() public view returns (uint256) {
+        return
+            ((totalAssetsWithoutFee() +
+                withdrawalsAfterFeeClaim -
+                lastBalance -
+                depositsAfterFeeClaim) * FeeData.platformFee) /
+            (10 ** feeDecimals);
+    }
+
+    function claimFee() public onlyOwner {
+        _payFee(getAvailableFee());
+        withdrawalsAfterFeeClaim = 0;
+        depositsAfterFeeClaim = 0;
+        lastBalance = totalAssetsWithoutFee();
+    }
+
+    function _deposit(
+        address caller,
+        address receiver,
+        uint256 assets,
+        uint256 shares
+    ) internal virtual override {
+        depositsAfterFeeClaim += assets;
+        super._deposit(caller, receiver, assets, shares);
     }
 }
