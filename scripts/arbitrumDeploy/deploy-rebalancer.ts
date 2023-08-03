@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 import { Rebalancer__factory } from "../../typechain-types";
-import { CreditProtocol__factory } from "../../typechain-types";
 
 let assets: string[] = [
   "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", //USDT
@@ -91,22 +90,13 @@ async function main() {
       symbols[i],
       treasury,
       positions,
-      protocolIbTokens
+      protocolIbTokens,
+      teamAddresses[i],
+      teamAddresses[i]
     );
 
     console.log(names[i]);
     console.log(rebalancer.address);
-
-    await rebalancer.grantRole(
-      await rebalancer.AUTOCOMPOUND_PROVIDER_ROLE(),
-      teamAddresses[i]
-    );
-
-    await rebalancer.grantRole(
-      await rebalancer.REBALANCE_PROVIDER_ROLE(),
-      teamAddresses[i]
-    );
-  
   }
 }
 
