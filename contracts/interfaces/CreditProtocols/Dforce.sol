@@ -12,11 +12,11 @@ contract dforce {
     function supplyRatePerBlock() public view returns (uint256) {}
 
     /**
-     * @dev Caller deposits assets into the market and caller receives iToken in exchange,
-     *        and add markets to caller's markets list for liquidity calculations.
+     * @dev Caller deposits assets into the market and `_recipient` receives iToken in exchange.
+     * @param _recipient The account that would receive the iToken.
      * @param _mintAmount The amount of the underlying token to deposit.
      */
-    function mintForSelfAndEnterMarket(uint256 _mintAmount) external {}
+    function mint(address _recipient, uint256 _mintAmount) external {}
 
     /**
      * @dev Caller redeems specified underlying from `_from` to get underlying token.
