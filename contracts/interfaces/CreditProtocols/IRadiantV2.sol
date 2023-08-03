@@ -79,7 +79,7 @@ contract radiantV2 {
      *   0 if the action is executed directly by the user, without any middle-man
      **/
 
-    function deposite(
+    function deposit(
         address asset,
         uint256 amount,
         address onBehalfOf,
