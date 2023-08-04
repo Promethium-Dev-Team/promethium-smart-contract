@@ -174,43 +174,18 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         emit FeesChanged(msg.sender, newFeeData);
     }
 
-    function redeem(
-        uint256 shares,
+    function _withdraw(
+        address caller,
         address receiver,
-        address owner
-    ) public override returns (uint256) {
-        require(shares <= maxRedeem(owner), "ERC4626: redeem more than max");
-
-        uint256 assets = previewRedeem(shares);
-        withdrawalsAfterFeeClaim += assets;
-
-        uint256 withdrawFee = (assets * FeeData.withdrawFee) /
-            (10 ** feeDecimals);
-
-        _payFee(withdrawFee);
-        _withdraw(_msgSender(), receiver, owner, assets - withdrawFee, shares);
-
-        return assets;
-    }
-
-    function withdraw(
+        address owner,
         uint256 assets,
-        address receiver,
-        address owner
-    ) public override returns (uint256) {
-        require(
-            assets <= maxWithdraw(owner),
-            "ERC4626: withdraw more than max"
-        );
+        uint256 shares
+    ) internal virtual override {
         withdrawalsAfterFeeClaim += assets;
-
-        uint256 shares = previewWithdraw(assets);
         uint256 withdrawFee = (assets * FeeData.withdrawFee) /
             (10 ** feeDecimals);
         _payFee(withdrawFee);
-        _withdraw(_msgSender(), receiver, owner, assets - withdrawFee, shares);
-
-        return shares;
+        super._withdraw(caller, receiver, owner, assets - withdrawFee, shares);
     }
 
     function requestWithdraw(uint256 assets) public {
