@@ -160,18 +160,14 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         return totalAssetsWithoutFee() - getAvailableFee();
     }
 
-    function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
-        require(
-            newFeeData.platformFee <= MAX_PLATFORM_FEE,
-            "Platform fee limit exceeded."
-        );
-        require(
-            newFeeData.withdrawFee <= MAX_WITHDRAW_FEE,
-            "Withdraw fee limit exceeded."
-        );
-        FeeData = newFeeData;
-
-        emit FeesChanged(msg.sender, newFeeData);
+    function _deposit(
+        address caller,
+        address receiver,
+        uint256 assets,
+        uint256 shares
+    ) internal virtual override {
+        depositsAfterFeeClaim += assets;
+        super._deposit(caller, receiver, assets, shares);
     }
 
     function _withdraw(
@@ -213,12 +209,18 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         emit RequestWithdraw(msg.sender, assets);
     }
 
-    function _payFee(uint256 amount) internal {
-        if (amount > 0) {
-            IERC20(poolToken).transfer(FeeData.treasury, amount);
+    function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
+        require(
+            newFeeData.platformFee <= MAX_PLATFORM_FEE,
+            "Platform fee limit exceeded."
+        );
+        require(
+            newFeeData.withdrawFee <= MAX_WITHDRAW_FEE,
+            "Withdraw fee limit exceeded."
+        );
+        FeeData = newFeeData;
 
-            emit FeesCharged(FeeData.treasury, amount);
-        }
+        emit FeesChanged(msg.sender, newFeeData);
     }
 
     function getAvailableFee() public view returns (uint256) {
@@ -237,13 +239,11 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         lastBalance = totalAssetsWithoutFee();
     }
 
-    function _deposit(
-        address caller,
-        address receiver,
-        uint256 assets,
-        uint256 shares
-    ) internal virtual override {
-        depositsAfterFeeClaim += assets;
-        super._deposit(caller, receiver, assets, shares);
+    function _payFee(uint256 amount) internal {
+        if (amount > 0) {
+            IERC20(poolToken).transfer(FeeData.treasury, amount);
+
+            emit FeesCharged(FeeData.treasury, amount);
+        }
     }
 }
