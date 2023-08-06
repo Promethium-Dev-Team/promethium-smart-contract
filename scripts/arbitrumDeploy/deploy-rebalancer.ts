@@ -9,17 +9,17 @@ let assets: string[] = [
   "0x912CE59144191C1204E64559FE8253a0e49E6548", //ARB
 ];
 let names: string[] = [
-  "RebalancerUSDT",
-  "RebalancerUSDC.e",
-  "RebalancerWBTC",
-  "RebalancerWETH",
-  "RebalancerARB",
+  "PromethiumUSDT",
+  "PromethiumUSDC.e",
+  "PromethiumWBTC",
+  "PromethiumWETH",
+  "PromethiumARB",
 ];
 let symbols: string[] = [
-  "sUSDT",
-  "sUSDC.e",
-  "sWBTC",
-  "sWETH",
+  "pUSDT",
+  "pUSDC.e",
+  "pWBTC",
+  "pWETH",
   "sARB",
 ];
 let teamAddresses: string[] = [
@@ -77,7 +77,7 @@ let ibTokens: string[][] = [
 ];
 
 async function main() {
-  for (let i = 0; i < assets.length; i++) {
+  for (let i = 0; i < 1; i++) {
     const [signer] = await ethers.getSigners();
     let positions = protocols[i];
     let protocolIbTokens = ibTokens[i];
