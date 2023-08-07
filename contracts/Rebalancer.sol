@@ -153,14 +153,13 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             "Withdraw queue limit exceeded."
         );
 
-        withdrawalsAfterFeeClaim += assets;
-
         uint256 shares = previewWithdraw(assets);
 
         _burn(msg.sender, shares);
-        totalRequested += assets;
-        withdrawQueue.push(DataTypes.withdrawRequest(msg.sender, assets));
 
+        withdrawQueue.push(DataTypes.withdrawRequest(msg.sender, assets));
+        totalRequested += assets;
+        withdrawalsAfterFeeClaim += assets;
         emit RequestWithdraw(msg.sender, assets);
     }
 
