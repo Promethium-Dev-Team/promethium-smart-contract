@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract interestBearning is ERC20, Ownable {
-
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
 
     function mint(address account, uint256 amount) public onlyOwner {
@@ -15,6 +14,4 @@ contract interestBearning is ERC20, Ownable {
     function burn(address account, uint256 amount) public onlyOwner {
         _burn(account, amount);
     }
-
-    
 }

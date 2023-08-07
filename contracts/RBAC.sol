@@ -14,26 +14,17 @@ contract RBAC is AccessControl {
         0x4155544f434f4d504f554e445f50524f56494445525f524f4c45000000000000;
 
     modifier onlyOwner() {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-            "Caller is not the owner"
-        );
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the owner");
         _;
     }
 
     modifier onlyRebalanceProvider() {
-        require(
-            hasRole(REBALANCE_PROVIDER_ROLE, msg.sender),
-            "Caller is not a rebalanceProvider"
-        );
+        require(hasRole(REBALANCE_PROVIDER_ROLE, msg.sender), "Caller is not a rebalanceProvider");
         _;
     }
 
     modifier onlyAutocompoundProvider() {
-        require(
-            hasRole(AUTOCOMPOUND_PROVIDER_ROLE, msg.sender),
-            "Caller is not a rebalanceProvider"
-        );
+        require(hasRole(AUTOCOMPOUND_PROVIDER_ROLE, msg.sender), "Caller is not a rebalanceProvider");
         _;
     }
 }

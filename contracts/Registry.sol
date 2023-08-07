@@ -58,10 +58,7 @@ contract Registry is RBAC {
 
     function removeIBToken(uint256 index) public onlyOwner {
         address positionAddress = positions[index];
-        require(
-            IERC20(positionAddress).balanceOf(address(this)) == 0,
-            "IB token balance should be 0."
-        );
+        require(IERC20(positionAddress).balanceOf(address(this)) == 0, "IB token balance should be 0.");
         isAdaptorSetup[positionAddress] = false;
 
         for (uint256 i = index; i < iBTokens.length - 1; i++) {

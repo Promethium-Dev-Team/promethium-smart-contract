@@ -92,12 +92,7 @@ contract AAVEV3 {
      * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
      *   0 if the action is executed directly by the user, without any middle-man
      */
-    function deposit(
-        address asset,
-        uint256 amount,
-        address onBehalfOf,
-        uint16 referralCode
-    ) external {}
+    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external {}
 
     /**
      * @notice Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
@@ -110,9 +105,5 @@ contract AAVEV3 {
      *   different wallet
      * @return The final amount withdrawn
      */
-    function withdraw(
-        address asset,
-        uint256 amount,
-        address to
-    ) external returns (uint256) {}
+    function withdraw(address asset, uint256 amount, address to) external returns (uint256) {}
 }

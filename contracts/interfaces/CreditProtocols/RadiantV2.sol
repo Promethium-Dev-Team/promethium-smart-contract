@@ -79,12 +79,7 @@ contract radiantV2 {
      *   0 if the action is executed directly by the user, without any middle-man
      **/
 
-    function deposit(
-        address asset,
-        uint256 amount,
-        address onBehalfOf,
-        uint16 referralCode
-    ) public {}
+    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) public {}
 
     /**
      * @dev Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
@@ -98,9 +93,5 @@ contract radiantV2 {
      * @return The final amount withdrawn
      **/
 
-    function withdraw(
-        address asset,
-        uint256 amount,
-        address to
-    ) public returns (uint256) {}
+    function withdraw(address asset, uint256 amount, address to) public returns (uint256) {}
 }

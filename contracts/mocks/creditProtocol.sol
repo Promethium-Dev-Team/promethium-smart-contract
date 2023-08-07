@@ -25,11 +25,7 @@ contract creditProtocol is Ownable {
     mapping(address => userInfo) accounts;
     address[] holders;
 
-    constructor(
-        address _mainToken,
-        string memory _name,
-        string memory _symbol
-    ) {
+    constructor(address _mainToken, string memory _name, string memory _symbol) {
         supplyRatePerSecond = 1e16;
         mainToken = IERC20(_mainToken);
         IBToken = new interestBearning(_name, _symbol);
@@ -47,9 +43,8 @@ contract creditProtocol is Ownable {
 
     function getNewIncome(address account) public view returns (uint256) {
         return
-            (IBToken.balanceOf(account) *
-                supplyRatePerSecond *
-                (block.timestamp - accounts[account].lastCalculated)) / 1e18;
+            (IBToken.balanceOf(account) * supplyRatePerSecond * (block.timestamp - accounts[account].lastCalculated)) /
+            1e18;
     }
 
     function deposit(uint256 amount) public {

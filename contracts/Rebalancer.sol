@@ -40,11 +40,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) {
         poolToken = _asset;
 
-        FeeData = DataTypes.feeData({
-            platformFee: 0.05 * 1e18,
-            withdrawFee: 0.0001 * 1e18,
-            treasury: _treasury
-        });
+        FeeData = DataTypes.feeData({platformFee: 0.05 * 1e18, withdrawFee: 0.0001 * 1e18, treasury: _treasury});
 
         for (uint i = 0; i < _positions.length; i++) {
             addPosition(_positions[i]);
@@ -53,46 +49,35 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         for (uint i = 0; i < _iBTokens.length; i++) {
             addIBToken(_iBTokens[i]);
         }
+
         grantRole(REBALANCE_PROVIDER_ROLE, rebalanceMatrixProvider);
         grantRole(AUTOCOMPOUND_PROVIDER_ROLE, autocompoundMatrixProvider);
     }
 
-    function harvest(
-        DataTypes.AdaptorCall[] memory autocompoundMatrix
-    ) external nonReentrant {
+    function harvest(DataTypes.AdaptorCall[] memory autocompoundMatrix) external nonReentrant {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
         uint256 balanceAfter = totalAssets();
-        require(
-            balanceBefore < balanceAfter,
-            "Balance after should be greater"
-        );
+        require(balanceBefore < balanceAfter, "Balance after should be greater");
 
         emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
 
-    function rebalance(
-        DataTypes.AdaptorCall[] memory distributionMatrix
-    ) external nonReentrant {
+    function rebalance(DataTypes.AdaptorCall[] memory distributionMatrix) external nonReentrant {
         _executeTransactions(distributionMatrix);
 
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
-            uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) /
-                (10 ** feeDecimals);
+            uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) / (10 ** feeDecimals);
             _payFee(fee);
-            IERC20(poolToken).transfer(
-                withdrawQueue[i].receiver,
-                withdrawQueue[i].amount - fee
-            );
+            IERC20(poolToken).transfer(withdrawQueue[i].receiver, withdrawQueue[i].amount - fee);
         }
         delete withdrawQueue;
         totalRequested = 0;
+
         emit Rebalance(msg.sender);
     }
 
-    function _executeTransactions(
-        DataTypes.AdaptorCall[] memory _matrix
-    ) internal {
+    function _executeTransactions(DataTypes.AdaptorCall[] memory _matrix) internal {
         for (uint8 i = 0; i < _matrix.length; ++i) {
             address adaptor = _matrix[i].adaptor;
             require(isAdaptorSetup[adaptor]);
@@ -115,12 +100,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         return totalAssetsWithoutFee() - getAvailableFee();
     }
 
-    function _deposit(
-        address caller,
-        address receiver,
-        uint256 assets,
-        uint256 shares
-    ) internal virtual override {
+    function _deposit(address caller, address receiver, uint256 assets, uint256 shares) internal virtual override {
         depositsAfterFeeClaim += assets;
         super._deposit(caller, receiver, assets, shares);
     }
@@ -133,45 +113,31 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 shares
     ) internal virtual override {
         withdrawalsAfterFeeClaim += assets;
-        uint256 withdrawFee = (assets * FeeData.withdrawFee) /
-            (10 ** feeDecimals);
+        uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** feeDecimals);
         _payFee(withdrawFee);
         super._withdraw(caller, receiver, owner, assets - withdrawFee, shares);
     }
 
     function requestWithdraw(uint256 assets) public {
-        require(
-            assets <= maxWithdraw(msg.sender),
-            "ERC4626: withdraw more than max"
-        );
-        require(
-            assets > IERC20(poolToken).balanceOf(address(this)),
-            "Instant withdraw is available"
-        );
-        require(
-            withdrawQueue.length < WITHDRAW_QUEUE_LIMIT,
-            "Withdraw queue limit exceeded."
-        );
+        require(assets <= maxWithdraw(msg.sender), "ERC4626: withdraw more than max");
+        require(assets > IERC20(poolToken).balanceOf(address(this)), "Instant withdraw is available");
+        require(withdrawQueue.length < WITHDRAW_QUEUE_LIMIT, "Withdraw queue limit exceeded.");
 
         uint256 shares = previewWithdraw(assets);
-
         _burn(msg.sender, shares);
 
         withdrawQueue.push(DataTypes.withdrawRequest(msg.sender, assets));
+
         totalRequested += assets;
         withdrawalsAfterFeeClaim += assets;
+
         emit RequestWithdraw(msg.sender, assets);
     }
 
     function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
-        require(
-            newFeeData.platformFee <= MAX_PLATFORM_FEE,
-            "Platform fee limit exceeded."
-        );
-        require(
-            newFeeData.withdrawFee <= MAX_WITHDRAW_FEE,
-            "Withdraw fee limit exceeded."
-        );
+        require(newFeeData.platformFee <= MAX_PLATFORM_FEE, "Platform fee limit exceeded.");
+        require(newFeeData.withdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded.");
+
         claimFee();
         FeeData = newFeeData;
 
@@ -180,15 +146,13 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function getAvailableFee() public view returns (uint256) {
         return
-            ((totalAssetsWithoutFee() +
-                withdrawalsAfterFeeClaim -
-                lastBalance -
-                depositsAfterFeeClaim) * FeeData.platformFee) /
-            (10 ** feeDecimals);
+            ((totalAssetsWithoutFee() + withdrawalsAfterFeeClaim - lastBalance - depositsAfterFeeClaim) *
+                FeeData.platformFee) / (10 ** feeDecimals);
     }
 
     function claimFee() public onlyOwner {
         _payFee(getAvailableFee());
+
         withdrawalsAfterFeeClaim = 0;
         depositsAfterFeeClaim = 0;
         lastBalance = totalAssetsWithoutFee();
