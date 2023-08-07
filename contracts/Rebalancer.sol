@@ -95,6 +95,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     ) internal {
         for (uint8 i = 0; i < _matrix.length; ++i) {
             address adaptor = _matrix[i].adaptor;
+            require(isAdaptorSetup[adaptor]);
             (bool success, ) = adaptor.call(_matrix[i].callData);
             require(success, "transaction failed");
         }
