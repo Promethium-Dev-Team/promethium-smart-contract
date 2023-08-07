@@ -27,7 +27,7 @@ export default {
         },
         arbitrumOne: {
             url: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-            accounts: [process.env.PRIVATE_KEY],
+            accounts: [process.env.PRIVATE_KEY, process.env.EXTRA_PRIVATE_KEY],
             chainId: 42161,
         },
         arbitrumAlchemy: {
