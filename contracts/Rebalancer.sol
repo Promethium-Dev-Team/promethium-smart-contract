@@ -172,6 +172,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             newFeeData.withdrawFee <= MAX_WITHDRAW_FEE,
             "Withdraw fee limit exceeded."
         );
+        claimFee();
         FeeData = newFeeData;
 
         emit FeesChanged(msg.sender, newFeeData);
