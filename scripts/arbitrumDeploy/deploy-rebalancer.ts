@@ -16,11 +16,11 @@ let names: string[] = [
   "PromethiumARB",
 ];
 let symbols: string[] = [
-  "pUSDT",
-  "pUSDC.e",
-  "pWBTC",
-  "pWETH",
-  "sARB",
+  "USDT_Share",
+  "USDC_Share",
+  "WBTC_Share",
+  "WETH_Share",
+  "ARB_Share",
 ];
 let teamAddresses: string[] = [
   "0x0ba2AdA8c803e85f1881E60B4Ad04C2962089956",
@@ -63,31 +63,32 @@ let protocols: string[][] = [
 let ibTokens: string[][] = [
   [
     "0xd69d402d1bdb9a2b8c3d88d98b9ceaf9e4cd72d9",
-    "0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9",
+    "0x66ddD8F3A0C4CEB6a324376EA6C00B4c8c1BB3d9",
     "0x6ab707aca953edaefbc4fd23ba73294241490620"
   ],
   [
     "0x48a29e756cc1c097388f3b2f3b570ed270423b3d",
-    "0x8dc3312c68125a94916d62B97bb5D925f84d4aE0",
+    "0x6C4CB1115927D50E495E554d38b83f2973F05361",
     "0x625E7708f30cA75bfd92586e17077590C60eb4cD"
   ],
   [
     "0x727354712BDFcd8596a3852Fd2065b3C34F4F770",
-    "0xD3204E4189BEcD9cD957046A8e4A643437eE0aCC",
+    "0x731e2246A0c67b1B19188C7019094bA9F107404f",
     "0x078f358208685046a11C85e8ad32895DED33A249"
   ],
   [
     "0x0dF5dfd95966753f01cb80E76dc20EA958238C46",
-    "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8"
+    "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8",
+    "0x712F1955E5eD3F7A5Ac7B5E4c480db8edF9b3fD7"
   ],
   [
     "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01",
-    "0x912CE59144191C1204E64559FE8253a0e49E6548"
+    "0x8B9a4ded05ad8C3AB959980538437b0562dBb129"
   ]
 ];
 
 async function main() {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < assets.length; i++) {
     const [signer] = await ethers.getSigners();
     let positions = protocols[i];
     let protocolIbTokens = ibTokens[i];
