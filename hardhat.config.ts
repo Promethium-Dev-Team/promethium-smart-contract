@@ -25,7 +25,7 @@ export default {
             accounts: [process.env.PRIVATE_KEY],
             chainId: 80001,
         },
-        arbitrum: {
+        arbitrumOne: {
             url: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
             accounts: [process.env.PRIVATE_KEY],
             chainId: 42161,
@@ -49,6 +49,7 @@ export default {
     etherscan: {
         apiKey: {
             goerli: `${process.env.ETHERSCAN_API_KEY}`,
+            arbitrumOne: `${process.env.ARBISCAN_API_KEY}`
         },
     },
 };
