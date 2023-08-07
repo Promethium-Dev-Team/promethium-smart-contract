@@ -6,14 +6,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Registry.sol";
 
 contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
-    event DistributionMatrixUpdated(
-        address provider,
-        DataTypes.AdaptorCall[] _newMatrix
-    );
-    event AutocompoundMatrixUpdated(
-        address provider,
-        DataTypes.AdaptorCall[] _newMatrix
-    );
     event Harvest(address caller, uint256 totalIncome);
     event Rebalance(address caller);
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
@@ -21,13 +13,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     event RequestWithdraw(address withdrawer, uint256 amount);
 
     DataTypes.feeData public FeeData;
-    DataTypes.AdaptorCall[] public distributionMatrix;
-    DataTypes.AdaptorCall[] public autocompoundMatrix;
-
-    bool public distributionMatrixExecuted;
-    bool public autocompoundMatrixExecuted;
 
     address public poolToken;
+
     DataTypes.withdrawRequest[] public withdrawQueue;
     uint256 public totalRequested;
 
@@ -69,42 +57,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         grantRole(AUTOCOMPOUND_PROVIDER_ROLE, autocompoundMatrixProvider);
     }
 
-    function setDistributionMatrix(
-        DataTypes.AdaptorCall[] memory _newMatrix
-    ) public onlyRebalanceProvider {
-        delete distributionMatrix;
-        distributionMatrixExecuted = false;
-
-        for (uint8 i = 0; i < _newMatrix.length; ++i) {
-            require(
-                isAdaptorSetup[_newMatrix[i].adaptor],
-                "Adaptor is not whitelisted"
-            );
-            distributionMatrix.push(_newMatrix[i]);
-        }
-
-        emit DistributionMatrixUpdated(msg.sender, _newMatrix);
-    }
-
-    function setAutocompoundMatrix(
-        DataTypes.AdaptorCall[] memory _newMatrix
-    ) public onlyAutocompoundProvider {
-        delete autocompoundMatrix;
-        autocompoundMatrixExecuted = false;
-
-        for (uint8 i = 0; i < _newMatrix.length; ++i) {
-            require(
-                isAdaptorSetup[_newMatrix[i].adaptor],
-                "Adaptor is not whitelisted"
-            );
-            autocompoundMatrix.push(_newMatrix[i]);
-        }
-
-        emit AutocompoundMatrixUpdated(msg.sender, _newMatrix);
-    }
-
-    function harvest() external nonReentrant {
-        require(!autocompoundMatrixExecuted, "Matrix already executed");
+    function harvest(
+        DataTypes.AdaptorCall[] memory autocompoundMatrix
+    ) external nonReentrant {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
         uint256 balanceAfter = totalAssets();
@@ -112,15 +67,14 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             balanceBefore < balanceAfter,
             "Balance after should be greater"
         );
-        autocompoundMatrixExecuted = true;
 
         emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
 
-    function rebalance() external nonReentrant {
-        require(!distributionMatrixExecuted, "Matrix already executed");
+    function rebalance(
+        DataTypes.AdaptorCall[] memory distributionMatrix
+    ) external nonReentrant {
         _executeTransactions(distributionMatrix);
-        distributionMatrixExecuted = true;
 
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
             uint256 fee = (withdrawQueue[i].amount * FeeData.withdrawFee) /
