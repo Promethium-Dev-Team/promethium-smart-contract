@@ -54,21 +54,21 @@ let ibTokens: string[][] = [
   [
     "0xd69d402d1bdb9a2b8c3d88d98b9ceaf9e4cd72d9",
     "0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9",
-    "0xB65Ab7e1c6c1Ba202baed82d6FB71975D56F007C"
+    "0x6ab707aca953edaefbc4fd23ba73294241490620"
   ],
   [
     "0x48a29e756cc1c097388f3b2f3b570ed270423b3d",
     "0x8dc3312c68125a94916d62B97bb5D925f84d4aE0",
-    "0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b"
+    "0x625E7708f30cA75bfd92586e17077590C60eb4cD"
   ],
   [
     "0x727354712BDFcd8596a3852Fd2065b3C34F4F770",
     "0xD3204E4189BEcD9cD957046A8e4A643437eE0aCC",
-    "0x3393cD223f59F32CC0cC845DE938472595cA48a1"
+    "0x078f358208685046a11C85e8ad32895DED33A249"
   ],
   [
     "0x0dF5dfd95966753f01cb80E76dc20EA958238C46",
-    "0x17933112E9780aBd0F27f2B7d9ddA9E840D43159"
+    "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8"
   ],
   [
     "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01",
@@ -94,7 +94,8 @@ async function main() {
       teamAddresses[i],
       teamAddresses[i]
     );
-
+    
+    
     console.log(names[i]);
     console.log(rebalancer.address);
   }
