@@ -3,20 +3,25 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./DataTypes.sol";
+import "./interfaces/IPriceRouter.sol";
 import "./RBAC.sol";
-import "hardhat/console.sol";
 
 contract Registry is RBAC {
     uint256 public ITOKENS_AMOUNT_LIMIT = 12;
     address[] public positions;
     address[] public iTokens;
 
+    IPriceRouter public router;
     mapping(address => bool) public isAdaptorSetup;
 
     event PositionAdded(address position, address admin);
     event ITokenAdded(address token, address admin);
     event PositionRemoved(address position, address admin);
     event ITokenRemoved(address position, address admin);
+
+    constructor(address _priceRouter) {
+        router = IPriceRouter(_priceRouter);
+    }
 
     function getPositions() public view returns (address[] memory) {
         return positions;

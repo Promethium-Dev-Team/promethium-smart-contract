@@ -33,22 +33,23 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         string memory _symbol,
         address _treasury,
         address[] memory _positions,
-        address[] memory _iBTokens,
-        address rebalanceMatrixProvider,
-        address autocompoundMatrixProvider
-    ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) {
+        address[] memory _iTokens,
+        address _rebalanceMatrixProvider,
+        address _autocompoundMatrixProvider,
+        address _router
+    ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) Registry(_router) {
         FeeData = DataTypes.feeData({platformFee: 0.1 * 1e18, withdrawFee: 0.0001 * 1e18, treasury: _treasury});
 
         for (uint i = 0; i < _positions.length; i++) {
             addPosition(_positions[i]);
         }
 
-        for (uint i = 0; i < _iBTokens.length; i++) {
-            addIBToken(_iBTokens[i]);
+        for (uint i = 0; i < _iTokens.length; i++) {
+            addIToken(_iTokens[i]);
         }
 
-        grantRole(REBALANCE_PROVIDER_ROLE, rebalanceMatrixProvider);
-        grantRole(AUTOCOMPOUND_PROVIDER_ROLE, autocompoundMatrixProvider);
+        grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
+        grantRole(AUTOCOMPOUND_PROVIDER_ROLE, _autocompoundMatrixProvider);
     }
 
     function _executeTransactions(DataTypes.AdaptorCall[] memory _matrix) internal {
@@ -62,8 +63,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function totalAssetsWithoutFee() private view returns (uint256) {
         uint256 _totalAssets = IERC20(asset()).balanceOf(address(this));
-        for (uint i = 0; i < iBTokens.length; i++) {
-            _totalAssets += IERC20(iBTokens[i]).balanceOf(address(this));
+        for (uint i = 0; i < iTokens.length; i++) {
+            _totalAssets += router.getTokenPrice(asset(), iTokens[i], IERC20(iTokens[i]).balanceOf(address(this)));
         }
         _totalAssets -= totalRequested;
 
@@ -93,7 +94,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
 
-    function rebalance(DataTypes.AdaptorCall[] memory distributionMatrix) external {
+    function rebalance(DataTypes.AdaptorCall[] memory distributionMatrix) external nonReentrant {
         _executeTransactions(distributionMatrix);
 
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
