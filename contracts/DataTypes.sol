@@ -21,6 +21,6 @@ library DataTypes {
 
     struct withdrawRequest {
         address receiver;
-        uint256 amount;
+        uint256 shares;
     }
 }
