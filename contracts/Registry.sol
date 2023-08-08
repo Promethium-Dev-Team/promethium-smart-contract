@@ -7,22 +7,23 @@ import "./RBAC.sol";
 import "hardhat/console.sol";
 
 contract Registry is RBAC {
+    uint256 public ITOKENS_AMOUNT_LIMIT = 12;
     address[] public positions;
-    address[] public iBTokens;
+    address[] public iTokens;
 
     mapping(address => bool) public isAdaptorSetup;
 
     event PositionAdded(address position, address admin);
-    event IBTokenAdded(address token, address admin);
+    event ITokenAdded(address token, address admin);
     event PositionRemoved(address position, address admin);
-    event IBTokenRemoved(address position, address admin);
+    event ITokenRemoved(address position, address admin);
 
     function getPositions() public view returns (address[] memory) {
         return positions;
     }
 
-    function getIBTokens() public view returns (address[] memory) {
-        return iBTokens;
+    function getITokens() public view returns (address[] memory) {
+        return iTokens;
     }
 
     function addPosition(address position) public onlyOwner {
@@ -45,27 +46,28 @@ contract Registry is RBAC {
         emit PositionRemoved(positionAddress, msg.sender);
     }
 
-    function addIBToken(address token) public onlyOwner {
+    function addIToken(address token) public onlyOwner {
         require(!isAdaptorSetup[token], "Already added");
 
         IERC20(token).balanceOf(address(this));
 
-        iBTokens.push(token);
+        iTokens.push(token);
         isAdaptorSetup[token] = true;
 
-        emit IBTokenAdded(token, msg.sender);
+        emit ITokenAdded(token, msg.sender);
     }
 
-    function removeIBToken(uint256 index) public onlyOwner {
+    function removeIToken(uint256 index) public onlyOwner {
+        require(iTokens.length < ITOKENS_AMOUNT_LIMIT, "iTokens limit amount exceeded");
         address positionAddress = positions[index];
-        require(IERC20(positionAddress).balanceOf(address(this)) == 0, "IB token balance should be 0.");
+        require(IERC20(positionAddress).balanceOf(address(this)) == 0, "Itoken balance should be 0.");
         isAdaptorSetup[positionAddress] = false;
 
-        for (uint256 i = index; i < iBTokens.length - 1; i++) {
-            iBTokens[i] = iBTokens[i + 1];
+        for (uint256 i = index; i < iTokens.length - 1; i++) {
+            iTokens[i] = iTokens[i + 1];
         }
-        iBTokens.pop();
+        iTokens.pop();
 
-        emit IBTokenRemoved(positionAddress, msg.sender);
+        emit ITokenRemoved(positionAddress, msg.sender);
     }
 }
