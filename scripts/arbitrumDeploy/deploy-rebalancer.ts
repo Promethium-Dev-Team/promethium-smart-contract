@@ -90,12 +90,15 @@ let ibTokens: string[][] = [
     "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8"
   ],
   [
-    "",
-    ""
+    "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01",
+    "0x912CE59144191C1204E64559FE8253a0e49E6548",
+    "0x8B9a4ded05ad8C3AB959980538437b0562dBb129",
+    "0x6533afac2e7bccb20dca161449a13a32d391fb00",
+    "0x8991d64fe388fA79A4f7Aa7826E8dA09F0c3C96a"
   ]
 ];
 
-let priceRouter: string = "0x344cD3010bD1B4Dad903F402fa64F59551e2C9F1";
+let priceRouter: string = "";
 
 async function main() {
   for (let i = 0; i < 1; i++) {
