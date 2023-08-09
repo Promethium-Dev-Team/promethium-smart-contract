@@ -27,7 +27,6 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     uint256 public constant REBALANCE_THRESHOLD = 0.001 * 1e18;
     uint256 public constant WITHDRAW_QUEUE_LIMIT = 10;
     uint256 public constant feeDecimals = 18;
-    uint256 public constant REBALANCE_THRESHOLD_DECIMALS = 18;
 
     constructor(
         address _asset,
@@ -101,8 +100,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         _executeTransactions(distributionMatrix);
         uint256 balanceAfter = totalAssets();
         require(
-            ((balanceBefore * (10 ** REBALANCE_THRESHOLD_DECIMALS - REBALANCE_THRESHOLD)) /
-                10 ** REBALANCE_THRESHOLD_DECIMALS) >= balanceAfter,
+            ((balanceBefore * (1e18 - REBALANCE_THRESHOLD)) / 1e18) <= balanceAfter,
             "Asset balance become too low."
         );
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
