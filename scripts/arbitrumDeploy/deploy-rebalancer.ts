@@ -98,7 +98,7 @@ let ibTokens: string[][] = [
   ]
 ];
 
-let priceRouter: string = "";
+let priceRouter: string = "0x946de3103Da9E309154778ab484a2ae7511DeecB";
 
 async function main() {
   for (let i = 0; i < 1; i++) {
