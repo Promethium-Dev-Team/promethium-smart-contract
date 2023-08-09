@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "contracts/interfaces/IPriceRouter.sol";
 import "./interfaces/iTokenDForce.sol";
 import "./interfaces/iTokenWePiggy.sol";
@@ -41,15 +40,15 @@ contract PriceRouter is IPriceRouter {
             }
             //dForce
             if (itoken == address(0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9)) {
-                return (amount * (10 ** routerDecimals)) / iTokenDForce(itoken).exchangeRateStored();
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
             //wepiggy
             if (itoken == address(0xB65Ab7e1c6c1Ba202baed82d6FB71975D56F007C)) {
-                return (amount * (10 ** routerDecimals)) / iTokenWePiggy(itoken).exchangeRateStored();
+                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
             //lodestar
             if (itoken == address(0x9365181A7df82a1cC578eAE443EFd89f00dbb643)) {
-                return (amount * (10 ** routerDecimals)) / iTokenLodestar(itoken).exchangeRateStored();
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
         } else if (token == usdc_e) {
             //radiant V2
@@ -66,11 +65,11 @@ contract PriceRouter is IPriceRouter {
             }
             //dForce
             if (itoken == address(0x8dc3312c68125a94916d62B97bb5D925f84d4aE0)) {
-                return (amount * (10 ** routerDecimals)) / iTokenDForce(itoken).exchangeRateStored();
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
             //wepiggy
             if (itoken == address(0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b)) {
-                return (amount * (10 ** routerDecimals)) / iTokenWePiggy(itoken).exchangeRateStored();
+                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
             //compound V3
             if (itoken == address(0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA)) {
@@ -78,7 +77,7 @@ contract PriceRouter is IPriceRouter {
             }
             //lodestar
             if (itoken == address(0x1ca530f02DD0487cef4943c674342c5aEa08922F)) {
-                return (amount * (10 ** routerDecimals)) / iTokenLodestar(itoken).exchangeRateStored();
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
         } else if (token == wbtc) {
             //radiant V2
@@ -95,15 +94,15 @@ contract PriceRouter is IPriceRouter {
             }
             //dForce
             if (itoken == address(0xD3204E4189BEcD9cD957046A8e4A643437eE0aCC)) {
-                return (amount * (10 ** routerDecimals)) / iTokenDForce(itoken).exchangeRateStored();
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
             //wepiggy
             if (itoken == address(0x3393cD223f59F32CC0cC845DE938472595cA48a1)) {
-                return (amount * (10 ** routerDecimals)) / iTokenWePiggy(itoken).exchangeRateStored();
+                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
             //lodestar
             if (itoken == address(0xC37896BF3EE5a2c62Cdbd674035069776f721668)) {
-                return (amount * (10 ** routerDecimals)) / iTokenLodestar(itoken).exchangeRateStored();
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
         } else if (token == weth) {
             //radiant V2
@@ -129,7 +128,7 @@ contract PriceRouter is IPriceRouter {
             }
             //lodestar
             if (itoken == address(0x8991d64fe388fA79A4f7Aa7826E8dA09F0c3C96a)) {
-                return (amount * (10 ** routerDecimals)) / iTokenLodestar(itoken).exchangeRateStored();
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
         }
 
