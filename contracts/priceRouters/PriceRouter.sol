@@ -24,7 +24,7 @@ contract PriceRouter is IPriceRouter {
         arb = _arb;
     }
 
-    function getTokenPrice(address token, address itoken, uint256 amount) public view returns (uint256) {
+    function getTokenValue(address token, address itoken, uint256 amount) public view returns (uint256) {
         if (token == usdt) {
             //radiant V2
             if (itoken == address(0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9)) {
