@@ -51,10 +51,8 @@ contract Registry is RBAC {
         emit PositionRemoved(positionAddress, msg.sender);
     }
 
-    function addIToken(address token) public onlyOwner {
+    function addIToken(address token) public virtual onlyOwner {
         require(!isAdaptorSetup[token], "Already added");
-
-        IERC20(token).balanceOf(address(this));
 
         iTokens.push(token);
         isAdaptorSetup[token] = true;

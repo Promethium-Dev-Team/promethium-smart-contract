@@ -65,10 +65,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     function totalAssetsWithoutFee() private view returns (uint256) {
         uint256 _totalAssets = IERC20(asset()).balanceOf(address(this));
         for (uint i = 0; i < iTokens.length; i++) {
-            _totalAssets += router.getTokenPrice(asset(), iTokens[i], IERC20(iTokens[i]).balanceOf(address(this)));
+            _totalAssets += router.getTokenValue(asset(), iTokens[i], IERC20(iTokens[i]).balanceOf(address(this)));
         }
-        _totalAssets -= totalRequested;
-
         return _totalAssets;
     }
 
@@ -149,6 +147,11 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         withdrawalsAfterFeeClaim = 0;
         depositsAfterFeeClaim = 0;
         lastBalance = totalAssetsWithoutFee();
+    }
+
+    function addIToken(address token) public override onlyOwner {
+        router.getTokenValue(asset(), token, 0);
+        super.addIToken(token);
     }
 
     function _deposit(address caller, address receiver, uint256 assets, uint256 shares) internal virtual override {
