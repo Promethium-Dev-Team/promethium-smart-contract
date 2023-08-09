@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import "../interfaces/iPriceRouter.sol";
+import "contracts/interfaces/IPriceRouter.sol";
 import "./interfaces/iTokenDForce.sol";
 import "./interfaces/iTokenWePiggy.sol";
 import "./interfaces/iTokenLodestar.sol";
