@@ -134,6 +134,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             );
         }
         delete withdrawQueue;
+        totalRequested = 0;
 
         emit Rebalance(msg.sender);
     }
@@ -196,7 +197,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 amount
     ) internal override {
         require(
-            amount <= maxRedeem(from),
+            amount <= maxRedeem(from) || from == address(0),
             "Transferring more than max available."
         );
     }
