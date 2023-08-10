@@ -93,6 +93,10 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         return super.maxRedeem(owner) - lockedShares[owner];
     }
 
+    function maxWithdraw(address owner) public view override returns (uint256) {
+        return _convertToAssets(maxRedeem(owner), Math.Rounding.Down);
+    }
+
     function harvest(
         DataTypes.AdaptorCall[] memory autocompoundMatrix
     ) external nonReentrant {
