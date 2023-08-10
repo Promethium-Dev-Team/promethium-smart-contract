@@ -19,5 +19,5 @@ module.exports = [
     ],
     "0x0ba2AdA8c803e85f1881E60B4Ad04C2962089956", //rebalancer
     "0x0ba2AdA8c803e85f1881E60B4Ad04C2962089956", //autocompounder
-    "0x344cD3010bD1B4Dad903F402fa64F59551e2C9F1" //router
+    "0x946de3103Da9E309154778ab484a2ae7511DeecB" //router
 ];
