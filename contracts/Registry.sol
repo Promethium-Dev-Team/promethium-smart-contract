@@ -53,6 +53,10 @@ contract Registry is RBAC {
 
     function addIToken(address token) public virtual onlyOwner {
         require(!isAdaptorSetup[token], "Already added");
+        require(
+            iTokens.length < ITOKENS_AMOUNT_LIMIT,
+            "iTokens limit amount exceeded"
+        );
 
         iTokens.push(token);
         isAdaptorSetup[token] = true;
@@ -61,9 +65,11 @@ contract Registry is RBAC {
     }
 
     function removeIToken(uint256 index) public onlyOwner {
-        require(iTokens.length < ITOKENS_AMOUNT_LIMIT, "iTokens limit amount exceeded");
-        address positionAddress = positions[index];
-        require(IERC20(positionAddress).balanceOf(address(this)) == 0, "Itoken balance should be 0.");
+        address positionAddress = iTokens[index];
+        require(
+            IERC20(positionAddress).balanceOf(address(this)) == 0,
+            "Itoken balance should be 0."
+        );
         isAdaptorSetup[positionAddress] = false;
 
         for (uint256 i = index; i < iTokens.length - 1; i++) {
