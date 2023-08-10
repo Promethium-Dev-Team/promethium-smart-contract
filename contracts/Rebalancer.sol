@@ -70,8 +70,15 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     }
 
     function getAvailableFee() public view returns (uint256) {
+        uint256 currentBalance = totalAssetsWithoutFee();
+        if (
+            currentBalance + withdrawalsAfterFeeClaim <=
+            lastBalance + depositsAfterFeeClaim
+        ) {
+            return 0;
+        }
         return
-            ((totalAssetsWithoutFee() +
+            ((currentBalance +
                 withdrawalsAfterFeeClaim -
                 lastBalance -
                 depositsAfterFeeClaim) * FeeData.platformFee) /
@@ -218,7 +225,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             address adaptor = _matrix[i].adaptor;
             require(isAdaptorSetup[adaptor]);
             (bool success, ) = adaptor.call(_matrix[i].callData);
-            require(success, "transaction failed");
+            require(success, "Transaction failed.");
         }
     }
 }
