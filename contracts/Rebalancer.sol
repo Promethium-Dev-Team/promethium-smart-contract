@@ -190,6 +190,17 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         super.addIToken(token);
     }
 
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        require(
+            amount <= maxRedeem(from),
+            "Transferring more than max available."
+        );
+    }
+
     function _deposit(
         address caller,
         address receiver,
