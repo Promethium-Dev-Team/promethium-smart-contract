@@ -89,8 +89,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         return totalAssetsWithoutFee() - getAvailableFee();
     }
 
-    function maxWithdraw(address owner) public view override returns (uint256) {
-        return super.maxWithdraw(owner) - lockedShares[owner];
+    function maxRedeem(address owner) public view override returns (uint256) {
+        return super.maxRedeem(owner) - lockedShares[owner];
     }
 
     function harvest(
@@ -136,7 +136,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function requestWithdraw(uint256 shares) public nonReentrant {
         require(
-            shares <= maxWithdraw(msg.sender),
+            shares <= maxRedeem(msg.sender),
             "ERC4626: withdraw more than max"
         );
         require(
