@@ -6,8 +6,13 @@ import "./DataTypes.sol";
 import "./interfaces/IPriceRouter.sol";
 import "./RBAC.sol";
 
+/**
+ * @dev     This contract is a storage of all positions and other info for the vault
+ */
+
 contract Registry is RBAC {
-    uint256 public ITOKENS_AMOUNT_LIMIT = 12;
+    uint256 public POSITIONS_LIMIT = 12;
+    uint256 public ITOKENS_LIMIT = 12;
     address[] public positions;
     address[] public iTokens;
 
@@ -23,23 +28,38 @@ contract Registry is RBAC {
         router = IPriceRouter(_priceRouter);
     }
 
+    /**
+     * @return  address[]  the list of contracts which the vault can iterate with
+     */
     function getPositions() public view returns (address[] memory) {
         return positions;
     }
 
+    /**
+     * @return  address[]  the list of ERC20 tokens which the vault store the balance in
+     */
     function getITokens() public view returns (address[] memory) {
         return iTokens;
     }
 
+    /**
+     * @notice  allows admin to add a new protocol
+     */
     function addPosition(address position) public onlyOwner {
         require(!isAdaptorSetup[position], "Already added");
-
+        require(
+            positions.length < POSITIONS_LIMIT,
+            "Positions limit amount exceeded"
+        );
         positions.push(position);
         isAdaptorSetup[position] = true;
 
         emit PositionAdded(position, msg.sender);
     }
 
+    /**
+     * @notice  allows admin to remove a protocol
+     */
     function removePosition(uint256 index) public onlyOwner {
         address positionAddress = positions[index];
         isAdaptorSetup[positionAddress] = false;
@@ -51,10 +71,13 @@ contract Registry is RBAC {
         emit PositionRemoved(positionAddress, msg.sender);
     }
 
+    /**
+     * @notice  allows admin to add a new iToken to store the balance in
+     */
     function addIToken(address token) public virtual onlyOwner {
         require(!isAdaptorSetup[token], "Already added");
         require(
-            iTokens.length < ITOKENS_AMOUNT_LIMIT,
+            iTokens.length < ITOKENS_LIMIT,
             "iTokens limit amount exceeded"
         );
 
@@ -64,6 +87,9 @@ contract Registry is RBAC {
         emit ITokenAdded(token, msg.sender);
     }
 
+    /**
+     * @notice  allows admin to remove iToken. The balance of this token should be 0.
+     */
     function removeIToken(uint256 index) public onlyOwner {
         address positionAddress = iTokens[index];
         require(
