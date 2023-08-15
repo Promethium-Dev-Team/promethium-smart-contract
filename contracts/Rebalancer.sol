@@ -252,7 +252,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address receiver,
         uint256 assets,
         uint256 shares
-    ) internal virtual override whenNotDepositesPause {
+    ) internal virtual override whenNotDepositsPause {
         depositsAfterFeeClaim += assets;
         super._deposit(caller, receiver, assets, shares);
     }

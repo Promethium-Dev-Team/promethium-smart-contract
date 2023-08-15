@@ -16,7 +16,7 @@ contract Registry is RBAC {
     address[] public positions;
     address[] public iTokens;
 
-    bool public depositesPaused;
+    bool public depositsPaused;
 
     IPriceRouter public router;
     mapping(address => bool) public isAdaptorSetup;
@@ -108,12 +108,12 @@ contract Registry is RBAC {
         emit ITokenRemoved(positionAddress, msg.sender);
     }
 
-    function setPause(bool _depositesPaused) public onlyOwner {
-        depositesPaused = _depositesPaused;
+    function setPause(bool _depositsPaused) public onlyOwner {
+        depositsPaused = _depositsPaused;
     }
 
-    modifier whenNotDepositesPause() {
-        require(!depositesPaused, "Deposites on pause");
+    modifier whenNotDepositsPause() {
+        require(!depositsPaused, "Deposits on pause");
         _;
     }
 }
