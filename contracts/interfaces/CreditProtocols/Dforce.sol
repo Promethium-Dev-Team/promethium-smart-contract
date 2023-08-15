@@ -23,11 +23,8 @@ contract dforce {
      * @param _from The account that would burn the iToken.
      * @param _redeemUnderlying The number of underlying to redeem.
      */
-    function redeemUnderlying(address _from, uint256 _redeemUnderlying) external {}
-
-    /**
-     * @notice Calculates interest and update total borrows and reserves.
-     * @dev Updates total borrows and reserves with any accumulated interest.
-     */
-    function updateInterest() external returns (bool) {}
+    function redeemUnderlying(
+        address _from,
+        uint256 _redeemUnderlying
+    ) external {}
 }
