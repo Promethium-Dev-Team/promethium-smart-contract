@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-interface IWePiggy {
+interface ITender {
     /**
      * @notice Returns the current per-block supply interest rate for this cToken
      * @return The supply interest rate per block, scaled by 1e18
