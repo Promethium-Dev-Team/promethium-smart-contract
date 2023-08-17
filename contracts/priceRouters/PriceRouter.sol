@@ -130,6 +130,10 @@ contract PriceRouter is IPriceRouter {
             if (itoken == address(0x8991d64fe388fA79A4f7Aa7826E8dA09F0c3C96a)) {
                 return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** routerDecimals));
             }
+            //dForce
+            if (itoken == address(0xD037c36dbc81a8890728D850E080e38F6EeB95EF)) {
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** routerDecimals));
+            }
         }
 
         revert("Not supported token");

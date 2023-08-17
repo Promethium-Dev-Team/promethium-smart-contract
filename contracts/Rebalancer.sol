@@ -42,11 +42,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address _autocompoundMatrixProvider,
         address _router
     ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) Registry(_router) {
-        FeeData = DataTypes.feeData({
-            platformFee: 0.1 * 1e18,
-            withdrawFee: 0.0001 * 1e18,
-            treasury: _treasury
-        });
+        FeeData = DataTypes.feeData({platformFee: 0.1 * 1e18, withdrawFee: 0.0001 * 1e18, treasury: _treasury});
 
         for (uint i = 0; i < _positions.length; i++) {
             addPosition(_positions[i]);
@@ -67,11 +63,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     function totalAssetsWithoutFee() private view returns (uint256) {
         uint256 _totalAssets = IERC20(asset()).balanceOf(address(this));
         for (uint i = 0; i < iTokens.length; i++) {
-            _totalAssets += router.getTokenValue(
-                asset(),
-                iTokens[i],
-                IERC20(iTokens[i]).balanceOf(address(this))
-            );
+            _totalAssets += router.getTokenValue(asset(), iTokens[i], IERC20(iTokens[i]).balanceOf(address(this)));
         }
         return _totalAssets;
     }
@@ -82,17 +74,11 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      */
     function getAvailableFee() public view returns (uint256) {
         uint256 currentBalance = totalAssetsWithoutFee();
-        if (
-            currentBalance + withdrawalsAfterFeeClaim <=
-            lastBalance + depositsAfterFeeClaim
-        ) {
+        if (currentBalance + withdrawalsAfterFeeClaim <= lastBalance + depositsAfterFeeClaim) {
             return 0;
         }
         return
-            ((currentBalance +
-                withdrawalsAfterFeeClaim -
-                lastBalance -
-                depositsAfterFeeClaim) * FeeData.platformFee) /
+            ((currentBalance + withdrawalsAfterFeeClaim - lastBalance - depositsAfterFeeClaim) * FeeData.platformFee) /
             (10 ** feeDecimals);
     }
 
@@ -130,16 +116,11 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @dev     the amount of tokens converted to underlying should not become lower after autocompound
      * @param   autocompoundMatrix  transactions which contract should execute
      */
-    function harvest(
-        DataTypes.AdaptorCall[] memory autocompoundMatrix
-    ) external nonReentrant onlyAutocompoundProvider {
+    function harvest(DataTypes.AdaptorCall[] memory autocompoundMatrix) external nonReentrant onlyAutocompoundProvider {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
         uint256 balanceAfter = totalAssets();
-        require(
-            balanceBefore < balanceAfter,
-            "Balance after should be greater"
-        );
+        require(balanceBefore < balanceAfter, "Balance after should be greater");
 
         emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
@@ -150,15 +131,12 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @param   distributionMatrix  transactions which contract should execute
      * NOTE: should revert if can't fullfit all requested withdrawals.
      */
-    function rebalance(
-        DataTypes.AdaptorCall[] memory distributionMatrix
-    ) external nonReentrant onlyRebalanceProvider {
+    function rebalance(DataTypes.AdaptorCall[] memory distributionMatrix) external nonReentrant onlyRebalanceProvider {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(distributionMatrix);
         uint256 balanceAfter = totalAssets();
         require(
-            ((balanceBefore * (1e18 - REBALANCE_THRESHOLD)) / 1e18) <=
-                balanceAfter,
+            ((balanceBefore * (1e18 - REBALANCE_THRESHOLD)) / 1e18) <= balanceAfter,
             "Asset balance become too low."
         );
         _fullfitwithdrawals();
@@ -172,18 +150,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @param   shares  amount of shares user withdraw during next rebalance
      */
     function requestWithdraw(uint256 shares) public nonReentrant {
-        require(
-            shares <= maxRedeem(msg.sender),
-            "ERC4626: withdraw more than max"
-        );
-        require(
-            shares > previewWithdraw(IERC20(asset()).balanceOf(address(this))),
-            "Instant withdraw is available"
-        );
-        require(
-            withdrawQueue.length < WITHDRAW_QUEUE_LIMIT,
-            "Withdraw queue limit exceeded."
-        );
+        require(shares <= maxRedeem(msg.sender), "ERC4626: withdraw more than max");
+        require(shares > previewWithdraw(IERC20(asset()).balanceOf(address(this))), "Instant withdraw is available");
+        require(withdrawQueue.length < WITHDRAW_QUEUE_LIMIT, "Withdraw queue limit exceeded.");
 
         lockedShares[msg.sender] += shares;
 
@@ -199,14 +168,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * NOTE: fees cannot be above the pre-negotiated limit
      */
     function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
-        require(
-            newFeeData.platformFee <= MAX_PLATFORM_FEE,
-            "Platform fee limit exceeded."
-        );
-        require(
-            newFeeData.withdrawFee <= MAX_WITHDRAW_FEE,
-            "Withdraw fee limit exceeded."
-        );
+        require(newFeeData.platformFee <= MAX_PLATFORM_FEE, "Platform fee limit exceeded.");
+        require(newFeeData.withdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded.");
 
         claimFee();
         FeeData = newFeeData;
@@ -236,15 +199,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     /**
      * @notice  shouldn't allow user to transfer his locked shares
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override {
-        require(
-            amount <= maxRedeem(from) || from == address(0),
-            "Transferring more than max available."
-        );
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override {
+        require(amount <= maxRedeem(from) || from == address(0), "Transferring more than max available.");
     }
 
     function _deposit(
@@ -268,8 +224,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 shares
     ) internal virtual override {
         withdrawalsAfterFeeClaim += assets;
-        uint256 withdrawFee = (assets * FeeData.withdrawFee) /
-            (10 ** feeDecimals);
+        uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** feeDecimals);
         _payFee(withdrawFee);
         super._withdraw(caller, receiver, owner, assets - withdrawFee, shares);
     }
@@ -288,9 +243,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     /**
      * @notice  executes the list of transactions for autocompound or rebalance
      */
-    function _executeTransactions(
-        DataTypes.AdaptorCall[] memory _matrix
-    ) internal {
+    function _executeTransactions(DataTypes.AdaptorCall[] memory _matrix) internal {
         for (uint8 i = 0; i < _matrix.length; ++i) {
             address adaptor = _matrix[i].adaptor;
             require(isAdaptorSetup[adaptor]);

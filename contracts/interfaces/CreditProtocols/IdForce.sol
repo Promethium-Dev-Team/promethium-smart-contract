@@ -23,8 +23,5 @@ interface Idforce {
      * @param _from The account that would burn the iToken.
      * @param _redeemUnderlying The number of underlying to redeem.
      */
-    function redeemUnderlying(
-        address _from,
-        uint256 _redeemUnderlying
-    ) external;
+    function redeemUnderlying(address _from, uint256 _redeemUnderlying) external;
 }

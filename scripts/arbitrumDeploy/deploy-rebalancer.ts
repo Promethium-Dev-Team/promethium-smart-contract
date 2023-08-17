@@ -1,5 +1,5 @@
-import { ethers } from "hardhat";
-import { Rebalancer__factory } from "../../typechain-types";
+import {ethers} from "hardhat";
+import {Rebalancer__factory} from "../../typechain-types";
 
 let assets: string[] = [
   "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", //USDT
@@ -8,20 +8,8 @@ let assets: string[] = [
   "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", //WETH
   "0x912CE59144191C1204E64559FE8253a0e49E6548", //ARB
 ];
-let names: string[] = [
-  "Promethium USDT",
-  "Promethium USDC.e",
-  "Promethium WBTC",
-  "Promethium WETH",
-  "Promethium ARB",
-];
-let symbols: string[] = [
-  "USDT Share",
-  "USDC Share",
-  "WBTC Share",
-  "WETH Share",
-  "ARB Share",
-];
+let names: string[] = ["Promethium USDT", "Promethium USDC.e", "Promethium WBTC", "Promethium WETH", "Promethium ARB"];
+let symbols: string[] = ["USDT Share", "USDC Share", "WBTC Share", "WETH Share", "ARB Share"];
 let teamAddresses: string[] = [
   "0x0ba2AdA8c803e85f1881E60B4Ad04C2962089956",
   "0x993Ad4736DF9571DD096Afb303A7d4e6564A46F6",
@@ -85,10 +73,7 @@ let ibTokens: string[][] = [
     "0x078f358208685046a11C85e8ad32895DED33A249",
     "0xC37896BF3EE5a2c62Cdbd674035069776f721668",
   ],
-  [
-    "0x0dF5dfd95966753f01cb80E76dc20EA958238C46",
-    "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8",
-  ],
+  ["0x0dF5dfd95966753f01cb80E76dc20EA958238C46", "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8"],
   [
     "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01",
     "0x8B9a4ded05ad8C3AB959980538437b0562dBb129",
@@ -100,7 +85,7 @@ let ibTokens: string[][] = [
 let priceRouter: string = "0x946de3103Da9E309154778ab484a2ae7511DeecB";
 
 async function main() {
-  for (let i = 4; i < assets.length; i++) {
+  for (let i = 1; i < assets.length; i++) {
     const [signer] = await ethers.getSigners();
     let positions = protocols[i];
     positions.push(assets[i]);
