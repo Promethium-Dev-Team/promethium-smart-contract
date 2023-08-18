@@ -139,7 +139,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             ((balanceBefore * (1e18 - REBALANCE_THRESHOLD)) / 1e18) <= balanceAfter,
             "Asset balance become too low."
         );
-        _fullfitwithdrawals();
+        _fullfitWithdrawals();
 
         emit Rebalance(msg.sender);
     }
@@ -255,7 +255,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     /**
      * @notice  all users should redeem their shares requested after previous rebalance
      */
-    function _fullfitwithdrawals() internal {
+    function _fullfitWithdrawals() internal {
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
             lockedShares[withdrawQueue[i].receiver] -= withdrawQueue[i].shares;
             uint256 assets = convertToAssets(withdrawQueue[i].shares);
