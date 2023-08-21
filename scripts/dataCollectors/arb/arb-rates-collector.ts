@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import {ethers} from "hardhat";
 import {
     getAAVEV3Rate,
     getRadiantV1Rate,
@@ -9,7 +9,7 @@ import {
     getDForceRate,
     secondsPerYear,
 } from "./arb-rates";
-import { BigNumber } from "ethers";
+import {BigNumber} from "ethers";
 
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const path = "./arbitrumARB.csv";
@@ -34,45 +34,45 @@ async function main() {
     const csvWriter = createCsvWriter({
         path: path,
         header: [
-            { id: "block", title: "BLOCK NUMBER" },
+            {id: "block", title: "BLOCK NUMBER"},
 
-            { id: "AAVEV3", title: "AAVEV3 Supply Rate" },
-            { id: "RadiantV1", title: "RadiantV1 Supply Rate" },
-            { id: "Tender", title: "Tender Supply Rate" },
-            { id: "Dolomite", title: "Dolomite Supply Rate" },
-            { id: "WePiggy", title: "WePiggy Supply Rate" },
-            { id: "RadiantV2", title: "RadiantV2 Supply Rate" },
-            { id: "Dforce", title: "Dforce Supply Rate" },
+            {id: "AAVEV3", title: "AAVEV3 Supply Rate"},
+            {id: "RadiantV1", title: "RadiantV1 Supply Rate"},
+            {id: "Tender", title: "Tender Supply Rate"},
+            {id: "Dolomite", title: "Dolomite Supply Rate"},
+            {id: "WePiggy", title: "WePiggy Supply Rate"},
+            {id: "RadiantV2", title: "RadiantV2 Supply Rate"},
+            {id: "Dforce", title: "Dforce Supply Rate"},
 
-            { id: "Strategy1", title: "10 minutes protocol index" },
-            { id: "Balance1", title: "10 minutes balance" },
+            {id: "Strategy1", title: "10 minutes protocol index"},
+            {id: "Balance1", title: "10 minutes balance"},
 
-            { id: "Strategy2", title: "20 minutes protocol index" },
-            { id: "Balance2", title: "20 minutes balance" },
+            {id: "Strategy2", title: "20 minutes protocol index"},
+            {id: "Balance2", title: "20 minutes balance"},
 
-            { id: "Strategy3", title: "30 minutes protocol index" },
-            { id: "Balance3", title: "30 minutes balance" },
+            {id: "Strategy3", title: "30 minutes protocol index"},
+            {id: "Balance3", title: "30 minutes balance"},
 
-            { id: "Strategy4", title: "1 hour protocol index" },
-            { id: "Balance4", title: "1 hour balance" },
+            {id: "Strategy4", title: "1 hour protocol index"},
+            {id: "Balance4", title: "1 hour balance"},
 
-            { id: "Strategy5", title: "2 hours protocol index" },
-            { id: "Balance5", title: "2 hours balance" },
+            {id: "Strategy5", title: "2 hours protocol index"},
+            {id: "Balance5", title: "2 hours balance"},
 
-            { id: "Strategy6", title: "5 hours protocol index" },
-            { id: "Balance6", title: "5 hours balance" },
+            {id: "Strategy6", title: "5 hours protocol index"},
+            {id: "Balance6", title: "5 hours balance"},
 
-            { id: "Strategy7", title: "10 hours protocol index" },
-            { id: "Balance7", title: "10 hours balance" },
+            {id: "Strategy7", title: "10 hours protocol index"},
+            {id: "Balance7", title: "10 hours balance"},
 
-            { id: "Strategy8", title: "1 day protocol index" },
-            { id: "Balance8", title: "1 day balance" },
+            {id: "Strategy8", title: "1 day protocol index"},
+            {id: "Balance8", title: "1 day balance"},
 
-            { id: "Strategy9", title: "2 days protocol index" },
-            { id: "Balance9", title: "2 days balance" },
+            {id: "Strategy9", title: "2 days protocol index"},
+            {id: "Balance9", title: "2 days balance"},
 
-            { id: "Strategy10", title: "5 days protocol index" },
-            { id: "Balance10", title: "5 days balance" },
+            {id: "Strategy10", title: "5 days protocol index"},
+            {id: "Balance10", title: "5 days balance"},
         ],
     });
 
@@ -87,17 +87,6 @@ async function main() {
     let strategy9Balance = 100;
     let strategy10Balance = 100;
 
-    let notClaimed1 = 0;
-    let notClaimed2 = 0;
-    let notClaimed3 = 0;
-    let notClaimed4 = 0;
-    let notClaimed5 = 0;
-    let notClaimed6 = 0;
-    let notClaimed7 = 0;
-    let notClaimed8 = 0;
-    let notClaimed9 = 0;
-    let notClaimed10 = 0;
-
     let strategy1Placement = 0;
     let strategy2Placement = 0;
     let strategy3Placement = 0;
@@ -109,8 +98,7 @@ async function main() {
     let strategy9Placement = 0;
     let strategy10Placement = 0;
 
-    let prevTimestamp = (await ethers.provider.getBlock(startBlockNumber))
-        .timestamp;
+    let prevTimestamp = (await ethers.provider.getBlock(startBlockNumber)).timestamp;
     let currentTimestamp = prevTimestamp;
 
     for (
@@ -119,8 +107,7 @@ async function main() {
         i += 1, currentBlockNumber += 1983
     ) {
         prevTimestamp = currentTimestamp;
-        currentTimestamp = (await ethers.provider.getBlock(currentBlockNumber))
-            .timestamp;
+        currentTimestamp = (await ethers.provider.getBlock(currentBlockNumber)).timestamp;
 
         rates[0] =
             BigNumber.from(await getAAVEV3Rate(currentBlockNumber))
@@ -208,46 +195,16 @@ async function main() {
             strategy10Placement = getMostProfitableStrategy();
         }
 
-        notClaimed1 +=
-            strategy1Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy1Placement];
-        notClaimed2 +=
-            strategy2Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy2Placement];
-        notClaimed3 +=
-            strategy3Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy3Placement];
-        notClaimed4 +=
-            strategy4Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy4Placement];
-        notClaimed5 +=
-            strategy5Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy5Placement];
-        notClaimed6 +=
-            strategy6Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy6Placement];
-        notClaimed7 +=
-            strategy7Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy7Placement];
-        notClaimed8 +=
-            strategy8Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy8Placement];
-        notClaimed9 +=
-            strategy9Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy9Placement];
-        notClaimed10 +=
-            strategy10Balance *
-            (currentTimestamp - prevTimestamp) *
-            rates[strategy10Placement];
+        notClaimed1 += strategy1Balance * (currentTimestamp - prevTimestamp) * rates[strategy1Placement];
+        notClaimed2 += strategy2Balance * (currentTimestamp - prevTimestamp) * rates[strategy2Placement];
+        notClaimed3 += strategy3Balance * (currentTimestamp - prevTimestamp) * rates[strategy3Placement];
+        notClaimed4 += strategy4Balance * (currentTimestamp - prevTimestamp) * rates[strategy4Placement];
+        notClaimed5 += strategy5Balance * (currentTimestamp - prevTimestamp) * rates[strategy5Placement];
+        notClaimed6 += strategy6Balance * (currentTimestamp - prevTimestamp) * rates[strategy6Placement];
+        notClaimed7 += strategy7Balance * (currentTimestamp - prevTimestamp) * rates[strategy7Placement];
+        notClaimed8 += strategy8Balance * (currentTimestamp - prevTimestamp) * rates[strategy8Placement];
+        notClaimed9 += strategy9Balance * (currentTimestamp - prevTimestamp) * rates[strategy9Placement];
+        notClaimed10 += strategy10Balance * (currentTimestamp - prevTimestamp) * rates[strategy10Placement];
 
         const records = [
             {
