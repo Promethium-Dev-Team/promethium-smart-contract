@@ -1,5 +1,5 @@
 import {ethers} from "hardhat";
-import {Contract, BigNumber, ContractFactory, providers} from "ethers";
+import {Contract} from "ethers";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {Registry__factory} from "../typechain-types";
