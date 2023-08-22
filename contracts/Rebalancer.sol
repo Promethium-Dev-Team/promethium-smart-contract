@@ -22,6 +22,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     uint256 depositsAfterFeeClaim;
     uint256 withdrawalsAfterFeeClaim;
 
+    uint256 public poolSizeLimit;
     uint64 public constant MAX_PLATFORM_FEE = 0.3 * 1e18;
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
     uint256 public constant REBALANCE_THRESHOLD = 0.01 * 1e18;
@@ -41,13 +42,15 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address _rebalanceMatrixProvider,
         address _autocompoundMatrixProvider,
         address _router,
-        address[] memory _whitelist
+        address[] memory _whitelist,
+        uint256 _poolSizeLimit
     )
         ERC4626(IERC20(_asset))
         ERC20(_name, _symbol)
         Registry(_positions, _iTokens, _rebalanceMatrixProvider, _autocompoundMatrixProvider, _router, _whitelist)
     {
         FeeData = DataTypes.feeData({platformFee: 0.1 * 1e18, withdrawFee: 0.0001 * 1e18, treasury: _treasury});
+        poolSizeLimit = _poolSizeLimit;
     }
 
     /**
@@ -203,6 +206,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 assets,
         uint256 shares
     ) internal virtual override whenNotDepositsPause onlyWhitelisted(msg.sender) {
+        require(totalAssets() + assets <= poolSizeLimit, "Pool limit exceeded");
         depositsAfterFeeClaim += assets;
         super._deposit(caller, receiver, assets, shares);
     }
