@@ -13,23 +13,14 @@ import "./interfaces/iTokenLodestar.sol";
 import "./interfaces/iTokenTender.sol";
 
 //need to make the contract upgredable
-contract PriceRouter is
-    Initializable,
-    IPriceRouter,
-    UUPSUpgradeable,
-    OwnableUpgradeable
-{
+contract PriceRouter is Initializable, IPriceRouter, UUPSUpgradeable, OwnableUpgradeable {
     address public usdt;
     address public usdc_e;
     address public wbtc;
     address public weth;
     address public arb;
 
-    function getTokenValue(
-        address token,
-        address itoken,
-        uint256 amount
-    ) public view returns (uint256) {
+    function getTokenValue(address token, address itoken, uint256 amount) public view returns (uint256) {
         if (token == usdt) {
             //radiant V2
             if (itoken == address(0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9)) {
@@ -45,23 +36,19 @@ contract PriceRouter is
             }
             //dForce
             if (itoken == address(0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9)) {
-                return ((amount * iTokenDForce(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //wepiggy
             if (itoken == address(0xB65Ab7e1c6c1Ba202baed82d6FB71975D56F007C)) {
-                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //lodestar
             if (itoken == address(0x9365181A7df82a1cC578eAE443EFd89f00dbb643)) {
-                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //tender
             if (itoken == address(0x4A5806A3c4fBB32F027240F80B18b26E40BF7E31)) {
-                return ((amount * iTokenTender(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenTender(itoken).exchangeRateStored()) / (10 ** 18));
             }
         } else if (token == usdc_e) {
             //radiant V2
@@ -78,13 +65,11 @@ contract PriceRouter is
             }
             //dForce
             if (itoken == address(0x8dc3312c68125a94916d62B97bb5D925f84d4aE0)) {
-                return ((amount * iTokenDForce(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //wepiggy
             if (itoken == address(0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b)) {
-                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //compound V3
             if (itoken == address(0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA)) {
@@ -92,13 +77,11 @@ contract PriceRouter is
             }
             //lodestar
             if (itoken == address(0x1ca530f02DD0487cef4943c674342c5aEa08922F)) {
-                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //tender
             if (itoken == address(0x068485a0f964B4c3D395059a19A05a8741c48B4E)) {
-                return ((amount * iTokenTender(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenTender(itoken).exchangeRateStored()) / (10 ** 18));
             }
         } else if (token == wbtc) {
             //radiant V2
@@ -115,23 +98,19 @@ contract PriceRouter is
             }
             //dForce
             if (itoken == address(0xD3204E4189BEcD9cD957046A8e4A643437eE0aCC)) {
-                return ((amount * iTokenDForce(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //wepiggy
             if (itoken == address(0x3393cD223f59F32CC0cC845DE938472595cA48a1)) {
-                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenWePiggy(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //lodestar
             if (itoken == address(0xC37896BF3EE5a2c62Cdbd674035069776f721668)) {
-                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //tender
             if (itoken == address(0x0A2f8B6223EB7DE26c810932CCA488A4936cF391)) {
-                return ((amount * iTokenTender(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenTender(itoken).exchangeRateStored()) / (10 ** 18));
             }
         } else if (token == weth) {
             //radiant V2
@@ -144,8 +123,7 @@ contract PriceRouter is
             }
             //tender
             if (itoken == address(0x242f91207184FCc220beA3c9E5f22b6d80F3faC5)) {
-                return ((amount * iTokenTender(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenTender(itoken).exchangeRateStored()) / (10 ** 18));
             }
         } else if (token == arb) {
             //radiant V2
@@ -162,31 +140,22 @@ contract PriceRouter is
             }
             //lodestar
             if (itoken == address(0x8991d64fe388fA79A4f7Aa7826E8dA09F0c3C96a)) {
-                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenLodestar(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //dForce
             if (itoken == address(0xD037c36dbc81a8890728D850E080e38F6EeB95EF)) {
-                return ((amount * iTokenDForce(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenDForce(itoken).exchangeRateStored()) / (10 ** 18));
             }
             //tender
             if (itoken == address(0xC6121d58E01B3F5C88EB8a661770DB0046523539)) {
-                return ((amount * iTokenTender(itoken).exchangeRateStored()) /
-                    (10 ** 18));
+                return ((amount * iTokenTender(itoken).exchangeRateStored()) / (10 ** 18));
             }
         }
 
         revert("Not supported token");
     }
 
-    function initialize(
-        address _usdt,
-        address _usdc_e,
-        address _wbtc,
-        address _weth,
-        address _arb
-    ) public initializer {
+    function initialize(address _usdt, address _usdc_e, address _wbtc, address _weth, address _arb) public initializer {
         usdt = _usdt;
         usdc_e = _usdc_e;
         wbtc = _wbtc;
