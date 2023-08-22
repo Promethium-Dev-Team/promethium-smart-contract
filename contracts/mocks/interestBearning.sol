@@ -22,6 +22,7 @@ contract interestBearning is ERC20 {
     address[] holders;
 
     constructor(address _mainToken, string memory _name, string memory _symbol) ERC20(_name, _symbol) {
+        _mint(msg.sender, 1e18);
         supplyRatePerSecond = 1e12;
         mainToken = IERC20(_mainToken);
     }
@@ -35,7 +36,9 @@ contract interestBearning is ERC20 {
     }
 
     function getNewIncome(address account) public view returns (uint256) {
-        return (super.balanceOf(account) * supplyRatePerSecond * (block.timestamp - accounts[account].lastCalculated)) / 1e18;
+        return
+            (super.balanceOf(account) * supplyRatePerSecond * (block.timestamp - accounts[account].lastCalculated)) /
+            1e18;
     }
 
     function deposit(uint256 amount) public {
