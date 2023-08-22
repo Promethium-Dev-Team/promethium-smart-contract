@@ -10,13 +10,15 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     event Rebalance(address caller);
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
     event FeesCharged(address treasury, uint256 amount);
-    event RequestWithdraw(address withdrawer, uint256 shares);
+    event RequestWithdraw(address withdrawer, uint256 shares, uint256 id);
+    event WithdrawalCompleted(address withdrawer, uint256 amount, uint256 id);
 
     DataTypes.feeData public FeeData;
 
     uint256 public totalRequested;
     mapping(address => uint256) lockedShares;
     DataTypes.withdrawRequest[] public withdrawQueue;
+    uint256 private withdrawalRequests;
 
     uint256 lastBalance;
     uint256 depositsAfterFeeClaim;
@@ -152,11 +154,12 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
         lockedShares[msg.sender] += shares;
 
-        withdrawQueue.push(DataTypes.withdrawRequest(msg.sender, shares));
+        withdrawalRequests++;
+        withdrawQueue.push(DataTypes.withdrawRequest(msg.sender, shares, withdrawalRequests));
 
         totalRequested += shares;
 
-        emit RequestWithdraw(msg.sender, shares);
+        emit RequestWithdraw(msg.sender, shares, withdrawalRequests);
     }
 
     /**
@@ -263,6 +266,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
                 assets,
                 withdrawQueue[i].shares
             );
+            emit WithdrawalCompleted(withdrawQueue[i].receiver, assets, withdrawQueue[i].id);
         }
         delete withdrawQueue;
         totalRequested = 0;
