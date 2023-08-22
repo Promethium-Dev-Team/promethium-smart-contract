@@ -37,18 +37,16 @@ contract Registry is RBAC {
         address _priceRouter,
         address[] memory _whitelist
     ) {
+        router = IPriceRouter(_priceRouter);
+
         for (uint i = 0; i < _positions.length; i++) {
             addPosition(_positions[i]);
         }
-
         for (uint i = 0; i < _iTokens.length; i++) {
             addIToken(_iTokens[i]);
         }
-
         grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
         grantRole(AUTOCOMPOUND_PROVIDER_ROLE, _autocompoundMatrixProvider);
-
-        router = IPriceRouter(_priceRouter);
 
         for (uint256 i = 0; i < _whitelist.length; i++) {
             _whitelistUser(_whitelist[i]);
