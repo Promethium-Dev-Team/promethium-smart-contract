@@ -115,7 +115,7 @@ contract Registry is RBAC {
      */
     function removeIToken(uint256 index) public onlyOwner {
         address positionAddress = iTokens[index];
-        require(IERC20(positionAddress).balanceOf(address(this)) == 0, "Itoken balance should be 0.");
+        require(IERC20(positionAddress).balanceOf(address(this)) == 0, "Itoken balance should be 0");
         isAdaptorSetup[positionAddress] = false;
 
         for (uint256 i = index; i < iTokens.length - 1; i++) {
@@ -131,6 +131,7 @@ contract Registry is RBAC {
     }
 
     function _whitelistUser(address user) internal {
+        require(whitelisted[user] == false, "Already whitelisted");
         whitelisted[user] = true;
 
         emit Whitelisted(user, msg.sender);
