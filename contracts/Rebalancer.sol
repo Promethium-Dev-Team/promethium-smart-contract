@@ -7,7 +7,7 @@ import "./Registry.sol";
 
 contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     event Harvest(address caller, uint256 totalIncome);
-    event Rebalance(address caller);
+    event Rebalance();
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
     event FeesCharged(address treasury, uint256 amount);
     event RequestWithdraw(address withdrawer, uint256 shares, uint256 id);
@@ -139,7 +139,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         );
         _fullfitWithdrawals();
 
-        emit Rebalance(msg.sender);
+        emit Rebalance();
     }
 
     /**
