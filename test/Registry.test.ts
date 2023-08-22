@@ -7,7 +7,7 @@ import {ERC20token__factory} from "../typechain-types";
 import {InterestBearning__factory} from "../typechain-types";
 import {PriceRouterMock__factory} from "../typechain-types";
 
-describe.only("Registry contract", async () => {
+describe("Registry contract", async () => {
     let Registry: Contract;
 
     let USDT: Contract;
@@ -256,6 +256,12 @@ describe.only("Registry contract", async () => {
         it("Adaptor should become not allowed after removing an itoken", async () => {
             await Registry.connect(owner).removeIToken(ethers.constants.Zero);
             expect(await Registry.isAdaptorSetup(iTokens[0])).to.equal(false);
+        });
+
+        it("Should emit after removing an iToken", async () => {
+            await expect(await Registry.connect(owner).removeIToken(ethers.constants.Zero))
+                .to.emit(Registry, "ITokenRemoved")
+                .withArgs(iTokens[0], owner.address);
         });
     });
 
