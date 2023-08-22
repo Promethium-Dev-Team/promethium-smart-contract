@@ -1,13 +1,29 @@
-# Sample Hardhat Project
+# Promethium Smart Contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This repository contains smart contracts of promethium rebalancer
 
-Try running some of the following tasks:
+## Installation
 
-```shell
-npx hardhat help
+```bash
+npm install
+```
+
+## Usage
+
+```
 npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+```
+
+## Compile
+
+To compile the smart contracts with Hardhat:
+
+```
+npx hardhat compile
+```
+
+## Deploy
+
+```
+npx hardhat run scripts/arbitrum/deploy-rebalancer.ts
 ```
