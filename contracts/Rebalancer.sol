@@ -40,20 +40,14 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _autocompoundMatrixProvider,
-        address _router
-    ) ERC4626(IERC20(_asset)) ERC20(_name, _symbol) Registry(_router) {
+        address _router,
+        address[] memory _whitelist
+    )
+        ERC4626(IERC20(_asset))
+        ERC20(_name, _symbol)
+        Registry(_positions, _iTokens, _rebalanceMatrixProvider, _autocompoundMatrixProvider, _router, _whitelist)
+    {
         FeeData = DataTypes.feeData({platformFee: 0.1 * 1e18, withdrawFee: 0.0001 * 1e18, treasury: _treasury});
-
-        for (uint i = 0; i < _positions.length; i++) {
-            addPosition(_positions[i]);
-        }
-
-        for (uint i = 0; i < _iTokens.length; i++) {
-            addIToken(_iTokens[i]);
-        }
-
-        grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
-        grantRole(AUTOCOMPOUND_PROVIDER_ROLE, _autocompoundMatrixProvider);
     }
 
     /**
@@ -208,7 +202,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address receiver,
         uint256 assets,
         uint256 shares
-    ) internal virtual override whenNotDepositsPause {
+    ) internal virtual override whenNotDepositsPause onlyWhitelisted(msg.sender) {
         depositsAfterFeeClaim += assets;
         super._deposit(caller, receiver, assets, shares);
     }

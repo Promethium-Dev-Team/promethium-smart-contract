@@ -19,15 +19,40 @@ contract Registry is RBAC {
     bool public depositsPaused;
 
     IPriceRouter public router;
+
     mapping(address => bool) public isAdaptorSetup;
+    mapping(address => bool) public whitelisted;
 
     event PositionAdded(address position, address admin);
     event ITokenAdded(address token, address admin);
     event PositionRemoved(address position, address admin);
     event ITokenRemoved(address position, address admin);
+    event Whitelisted(address user, address admin);
 
-    constructor(address _priceRouter) {
+    constructor(
+        address[] memory _positions,
+        address[] memory _iTokens,
+        address _rebalanceMatrixProvider,
+        address _autocompoundMatrixProvider,
+        address _priceRouter,
+        address[] memory _whitelist
+    ) {
+        for (uint i = 0; i < _positions.length; i++) {
+            addPosition(_positions[i]);
+        }
+
+        for (uint i = 0; i < _iTokens.length; i++) {
+            addIToken(_iTokens[i]);
+        }
+
+        grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
+        grantRole(AUTOCOMPOUND_PROVIDER_ROLE, _autocompoundMatrixProvider);
+
         router = IPriceRouter(_priceRouter);
+
+        for (uint256 i = 0; i < _whitelist.length; i++) {
+            _whitelistUser(_whitelist[i]);
+        }
     }
 
     /**
@@ -47,9 +72,11 @@ contract Registry is RBAC {
     /**
      * @notice  allows admin to add a new protocol
      */
+
     function addPosition(address position) public onlyOwner {
         require(!isAdaptorSetup[position], "Already added");
         require(positions.length < POSITIONS_LIMIT, "Positions limit amount exceeded");
+
         positions.push(position);
         isAdaptorSetup[position] = true;
 
@@ -99,8 +126,23 @@ contract Registry is RBAC {
         emit ITokenRemoved(positionAddress, msg.sender);
     }
 
+    function whitelistUser(address user) public onlyOwner {
+        _whitelistUser(user);
+    }
+
+    function _whitelistUser(address user) internal {
+        whitelisted[user] = true;
+
+        emit Whitelisted(user, msg.sender);
+    }
+
     function setPause(bool _depositsPaused) public onlyOwner {
         depositsPaused = _depositsPaused;
+    }
+
+    modifier onlyWhitelisted(address user) {
+        require(whitelisted[user] == true, "Not whitelsited");
+        _;
     }
 
     modifier whenNotDepositsPause() {
