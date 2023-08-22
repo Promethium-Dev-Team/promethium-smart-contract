@@ -135,7 +135,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 balanceAfter = totalAssets();
         require(
             ((balanceBefore * (1e18 - REBALANCE_THRESHOLD)) / 1e18) <= balanceAfter,
-            "Asset balance become too low."
+            "Asset balance become too low"
         );
         _fullfitWithdrawals();
 
