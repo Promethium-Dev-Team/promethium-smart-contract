@@ -13,6 +13,7 @@
     "@openzeppelin/hardhat-upgrades": "1.5",
     "csv-writer": "^1.6.0",
     "dotenv": "^16.3.1",
-    "ethers-multicall-provider": "^3.0.2"
+    "ethers-multicall-provider": "^3.0.2",
+    "solidity-coverage": "^0.8.4"
   }
 }
