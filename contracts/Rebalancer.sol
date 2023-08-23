@@ -12,6 +12,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     event FeesCharged(address treasury, uint256 amount);
     event RequestWithdraw(address withdrawer, uint256 shares, uint256 id);
     event WithdrawalCompleted(address withdrawer, uint256 amount, uint256 id);
+    event SetPoolLimit(uint256 newLimit);
 
     DataTypes.feeData public FeeData;
 
@@ -270,5 +271,11 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         }
         delete withdrawQueue;
         totalRequested = 0;
+    }
+
+    function setPoolLimit(uint256 newLimit) public onlyOwner {
+        poolLimitSize = newLimit;
+
+        emit SetPoolLimit(newLimit);
     }
 }
