@@ -5,5 +5,5 @@ interface IRadiantV2Rewarder {
     /**
      * @notice Claim all pending staking rewards.
      */
-    function getReward(address[] memory _rewardTokens) external;
+    function getAllRewards() external;
 }
