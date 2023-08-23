@@ -14,7 +14,7 @@ library DataTypes {
     }
 
     struct feeData {
-        uint64 platformFee;
+        uint64 performanceFee;
         uint64 withdrawFee;
         address treasury;
     }

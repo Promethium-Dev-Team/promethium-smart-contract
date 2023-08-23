@@ -19,12 +19,12 @@ contract RBAC is AccessControl {
     }
 
     modifier onlyRebalanceProvider() {
-        require(hasRole(REBALANCE_PROVIDER_ROLE, msg.sender), "Caller is not a rebalanceProvider");
+        require(hasRole(REBALANCE_PROVIDER_ROLE, msg.sender), "Caller is not a rabalance provider");
         _;
     }
 
     modifier onlyAutocompoundProvider() {
-        require(hasRole(AUTOCOMPOUND_PROVIDER_ROLE, msg.sender), "Caller is not a rebalanceProvider");
+        require(hasRole(AUTOCOMPOUND_PROVIDER_ROLE, msg.sender), "Caller is not a autocompound provider");
         _;
     }
 }

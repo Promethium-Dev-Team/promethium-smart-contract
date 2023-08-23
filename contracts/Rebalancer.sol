@@ -16,7 +16,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     DataTypes.feeData public FeeData;
 
     uint256 public totalRequested;
-    mapping(address => uint256) lockedShares;
+    mapping(address => uint256) public lockedShares;
     DataTypes.withdrawRequest[] public withdrawQueue;
     uint256 private withdrawalRequests;
 
@@ -25,7 +25,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     uint256 withdrawalsAfterFeeClaim;
 
     uint256 public poolLimitSize;
-    uint64 public constant MAX_PLATFORM_FEE = 0.3 * 1e18;
+    uint64 public constant MAX_PERFORMANCE_FEE = 0.3 * 1e18;
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
     uint256 public constant REBALANCE_THRESHOLD = 0.01 * 1e18;
     uint256 public constant WITHDRAW_QUEUE_LIMIT = 10;
@@ -50,7 +50,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         ERC20(_name, _symbol)
         Registry(_positions, _iTokens, _rebalanceMatrixProvider, _autocompoundMatrixProvider, _router, _whitelist)
     {
-        FeeData = DataTypes.feeData({platformFee: 0.1 * 1e18, withdrawFee: 0.001 * 1e18, treasury: msg.sender});
+        FeeData = DataTypes.feeData({performanceFee: 0.1 * 1e18, withdrawFee: 0.001 * 1e18, treasury: msg.sender});
         poolLimitSize = _poolLimitSize;
     }
 
@@ -76,8 +76,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
             return 0;
         }
         return
-            ((currentBalance + withdrawalsAfterFeeClaim - lastBalance - depositsAfterFeeClaim) * FeeData.platformFee) /
-            (10 ** feeDecimals);
+            ((currentBalance + withdrawalsAfterFeeClaim - lastBalance - depositsAfterFeeClaim) *
+                FeeData.performanceFee) / (10 ** feeDecimals);
     }
 
     /**
@@ -150,7 +150,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     function requestWithdraw(uint256 shares) public nonReentrant {
         require(shares <= maxRedeem(msg.sender), "ERC4626: withdraw more than max");
         require(shares > previewWithdraw(IERC20(asset()).balanceOf(address(this))), "Instant withdraw is available");
-        require(withdrawQueue.length < WITHDRAW_QUEUE_LIMIT, "Withdraw queue limit exceeded.");
+        require(withdrawQueue.length < WITHDRAW_QUEUE_LIMIT, "Withdraw queue limit exceeded");
 
         lockedShares[msg.sender] += shares;
 
@@ -167,8 +167,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * NOTE: fees cannot be above the pre-negotiated limit
      */
     function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
-        require(newFeeData.platformFee <= MAX_PLATFORM_FEE, "Platform fee limit exceeded.");
-        require(newFeeData.withdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded.");
+        require(newFeeData.performanceFee <= MAX_PERFORMANCE_FEE, "Performance fee limit exceeded");
+        require(newFeeData.withdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded");
 
         claimFee();
         FeeData = newFeeData;
@@ -199,7 +199,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @notice  shouldn't allow user to transfer his locked shares
      */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal override {
-        require(amount <= maxRedeem(from) || from == address(0), "Transferring more than max available.");
+        require(amount <= maxRedeem(from) || from == address(0), "Transferring more than max available");
     }
 
     function _deposit(
