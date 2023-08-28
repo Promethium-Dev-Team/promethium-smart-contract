@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Registry.sol";
 
 contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
-    event Harvest(address caller, uint256 totalIncome, uint256 calculationsBlock);
-    event Rebalance(uint256 calculationsBlock);
+    event Harvest(address caller, uint256 totalIncome);
+    event Rebalance();
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
     event FeesCharged(address treasury, uint256 amount);
     event RequestWithdraw(address withdrawer, uint256 shares, uint256 id);
@@ -115,16 +115,13 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @dev     the amount of tokens converted to underlying should not become lower after autocompound
      * @param   autocompoundMatrix  transactions which contract should execute
      */
-    function harvest(
-        DataTypes.AdaptorCall[] memory autocompoundMatrix,
-        uint256 calculationsBlock
-    ) external nonReentrant onlyAutocompoundProvider {
+    function harvest(DataTypes.AdaptorCall[] memory autocompoundMatrix) external nonReentrant onlyAutocompoundProvider {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(autocompoundMatrix);
         uint256 balanceAfter = totalAssets();
         require(balanceBefore < balanceAfter, "Balance after should be greater");
 
-        emit Harvest(msg.sender, balanceAfter - balanceBefore, calculationsBlock);
+        emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
 
     /**
@@ -133,10 +130,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @param   distributionMatrix  transactions which contract should execute
      * NOTE: should revert if can't fullfit all requested withdrawals.
      */
-    function rebalance(
-        DataTypes.AdaptorCall[] memory distributionMatrix,
-        uint256 calculationsBlock
-    ) external nonReentrant onlyRebalanceProvider {
+    function rebalance(DataTypes.AdaptorCall[] memory distributionMatrix) external nonReentrant onlyRebalanceProvider {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(distributionMatrix);
         uint256 balanceAfter = totalAssets();
@@ -146,7 +140,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         );
         _fullfitWithdrawals();
 
-        emit Rebalance(calculationsBlock);
+        emit Rebalance();
     }
 
     /**
