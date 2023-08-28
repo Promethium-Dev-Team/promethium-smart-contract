@@ -4,6 +4,8 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract RBAC is AccessControl {
+    bool public whitelistDisabled;
+
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
@@ -30,7 +32,12 @@ contract RBAC is AccessControl {
     }
 
     modifier onlyWhitelisted() {
-        require(hasRole(WHITELISTED_ROLE, msg.sender), "Caller is not whitelisted");
+        require(whitelistDisabled || hasRole(WHITELISTED_ROLE, msg.sender), "Caller is not whitelisted");
         _;
+    }
+
+    function disableWhitelist() public onlyOwner {
+        require(!whitelistDisabled, "Already disabled");
+        whitelistDisabled = true;
     }
 }
