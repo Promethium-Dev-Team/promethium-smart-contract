@@ -214,7 +214,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address receiver,
         uint256 assets,
         uint256 shares
-    ) internal virtual override whenNotDepositsPause onlyWhitelisted(msg.sender) nonReentrant {
+    ) internal virtual override whenNotDepositsPause onlyWhitelisted nonReentrant {
         require(totalAssets() + assets <= poolLimitSize, "Pool limit exceeded");
         depositsAfterFeeClaim += assets;
         super._deposit(caller, receiver, assets, shares);

@@ -142,7 +142,8 @@ describe("Rebalancer contract", async () => {
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue.div(2)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
 
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             expect(await Rebalancer.totalAssets()).to.equal(bobDepositValue);
         });
@@ -182,8 +183,8 @@ describe("Rebalancer contract", async () => {
             let rebalanceTransactions = [];
             let transaction = USDT.interface.encodeFunctionData("transfer", [owner.address, 1]);
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
-
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
             expect(await Rebalancer.getAvailableFee()).to.equal(ethers.constants.Zero);
         });
     });
@@ -212,8 +213,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue.div(2)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-
-            await expect(Rebalancer.connect(bob).rebalance(rebalanceTransactions)).to.be.revertedWith(
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await expect(Rebalancer.connect(bob).rebalance(rebalanceTransactions, currentBlock)).to.be.revertedWith(
                 "Caller is not a rabalance provider",
             );
         });
@@ -232,9 +233,9 @@ describe("Rebalancer contract", async () => {
                 maxPossibleBalanceDrop.add(1),
             ]);
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
-
+            let currentBlock = await ethers.provider.getBlockNumber();
             await expect(
-                Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions),
+                Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock),
             ).to.be.revertedWith("Asset balance become too low");
         });
 
@@ -247,11 +248,12 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue.div(2)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-
-            await expect(await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions)).to.emit(
-                Rebalancer,
-                "Rebalance",
-            );
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await expect(
+                await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock),
+            )
+                .to.emit(Rebalancer, "Rebalance")
+                .withArgs(currentBlock);
         });
     });
 
@@ -274,7 +276,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue.div(2)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let sharesThreshold = await Rebalancer.convertToShares((await Rebalancer.totalAssets()).div(2));
             await expect(Rebalancer.connect(bob).requestWithdraw(sharesThreshold.mul(9).div(10))).to.be.revertedWith(
@@ -291,7 +294,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let maxRequests = await Rebalancer.WITHDRAW_QUEUE_LIMIT();
 
@@ -313,7 +317,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -330,7 +335,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -347,7 +353,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares);
@@ -366,7 +373,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares);
@@ -383,7 +391,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
 
@@ -401,7 +410,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await expect(Rebalancer.connect(bob).requestWithdraw(bobShares.div(4)))
@@ -426,7 +436,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -434,7 +445,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions = [];
             transaction = Aave.interface.encodeFunctionData("withdraw", [await Aave.balanceOf(Rebalancer.address)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             expect(await Rebalancer.lockedShares(bob.address)).to.equal(ethers.constants.Zero);
         });
@@ -448,7 +460,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -456,7 +469,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions = [];
             transaction = Aave.interface.encodeFunctionData("withdraw", [await Aave.balanceOf(Rebalancer.address)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
 
             expect((await Rebalancer.withdrawQueue(0)).id).to.equal(ethers.constants.Two);
@@ -471,7 +485,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -479,11 +494,10 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions = [];
             transaction = Aave.interface.encodeFunctionData("withdraw", [await Aave.balanceOf(Rebalancer.address)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-
-            await expect(Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions)).to.emit(
-                Rebalancer,
-                "WithdrawalCompleted",
-            );
+            currentBlock = await ethers.provider.getBlockNumber();
+            await expect(
+                Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock),
+            ).to.emit(Rebalancer, "WithdrawalCompleted");
         });
 
         it("Total requested shares should be equal to zero after rebalance", async () => {
@@ -495,7 +509,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -503,7 +518,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions = [];
             transaction = Aave.interface.encodeFunctionData("withdraw", [await Aave.balanceOf(Rebalancer.address)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             expect(await Rebalancer.totalRequested()).to.equal(ethers.constants.Zero);
         });
@@ -517,7 +533,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            let currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await Rebalancer.connect(bob).requestWithdraw(bobShares.div(2));
@@ -525,7 +542,8 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions = [];
             transaction = Aave.interface.encodeFunctionData("withdraw", [await Aave.balanceOf(Rebalancer.address)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
+            currentBlock = await ethers.provider.getBlockNumber();
+            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions, currentBlock);
 
             expect(await Rebalancer.balanceOf(bob.address)).to.equal(bobShares.div(2));
         });
@@ -563,7 +581,7 @@ describe("Rebalancer contract", async () => {
         });
         it("Should revert when not whitelist person is trying to deposit", async () => {
             await expect(Rebalancer.connect(charlie).deposit(ethers.constants.One, charlie.address)).to.be.revertedWith(
-                "Not whitelsited",
+                "Caller is not whitelisted",
             );
         });
     });
@@ -635,8 +653,9 @@ describe("Rebalancer contract", async () => {
             autocompoundTransactions.push({adaptor: USDT.address, callData: transaction});
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
             autocompoundTransactions.push({adaptor: Aave.address, callData: transaction});
+            let currentBlock = await ethers.provider.getBlockNumber();
             await expect(
-                Rebalancer.connect(rebalanceMatrixProvider).harvest(autocompoundTransactions),
+                Rebalancer.connect(rebalanceMatrixProvider).harvest(autocompoundTransactions, currentBlock),
             ).to.be.revertedWith("Caller is not a autocompound provider");
         });
 
@@ -647,8 +666,9 @@ describe("Rebalancer contract", async () => {
             let autocompoundTransactions = [];
             let transaction = USDT.interface.encodeFunctionData("transfer", [charlie.address, ethers.constants.One]);
             autocompoundTransactions.push({adaptor: USDT.address, callData: transaction});
+            let currentBlock = await ethers.provider.getBlockNumber();
             await expect(
-                Rebalancer.connect(autocompoundMatrixProvider).harvest(autocompoundTransactions),
+                Rebalancer.connect(autocompoundMatrixProvider).harvest(autocompoundTransactions, currentBlock),
             ).to.be.revertedWith("Balance after should be greater");
         });
     });

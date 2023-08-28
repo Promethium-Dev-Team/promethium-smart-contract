@@ -21,7 +21,6 @@ contract Registry is RBAC {
     IPriceRouter public router;
 
     mapping(address => bool) public isAdaptorSetup;
-    mapping(address => bool) public whitelisted;
 
     event PositionAdded(address position, address admin);
     event ITokenAdded(address token, address admin);
@@ -49,7 +48,7 @@ contract Registry is RBAC {
         grantRole(AUTOCOMPOUND_PROVIDER_ROLE, _autocompoundMatrixProvider);
 
         for (uint256 i = 0; i < _whitelist.length; i++) {
-            _whitelistUser(_whitelist[i]);
+            grantRole(WHITELISTED_ROLE, _whitelist[i]);
         }
     }
 
@@ -124,24 +123,8 @@ contract Registry is RBAC {
         emit ITokenRemoved(positionAddress, msg.sender);
     }
 
-    function whitelistUser(address user) public onlyOwner {
-        _whitelistUser(user);
-    }
-
-    function _whitelistUser(address user) internal {
-        require(whitelisted[user] == false, "Already whitelisted");
-        whitelisted[user] = true;
-
-        emit Whitelisted(user, msg.sender);
-    }
-
     function setPause(bool _depositsPaused) public onlyOwner {
         depositsPaused = _depositsPaused;
-    }
-
-    modifier onlyWhitelisted(address user) {
-        require(whitelisted[user] == true, "Not whitelsited");
-        _;
     }
 
     modifier whenNotDepositsPause() {

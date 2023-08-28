@@ -121,13 +121,13 @@ describe("Registry contract", async () => {
 
         it("Should whitelist wallets", async () => {
             for (let i = 0; i < whitelist.length; i++) {
-                expect(await Registry.whitelisted(whitelist[i])).to.equal(true);
+                expect(await Registry.hasRole(await Registry.WHITELISTED_ROLE(), whitelist[i])).to.equal(true);
             }
         });
 
         it("Should not whitelist any other", async () => {
             for (let i = 0; i < whitelist.length; i++) {
-                expect(await Registry.whitelisted(charlie.address)).to.equal(false);
+                expect(await Registry.hasRole(await Registry.WHITELISTED_ROLE(), charlie.address)).to.equal(false);
             }
         });
     });
@@ -262,26 +262,6 @@ describe("Registry contract", async () => {
             await expect(await Registry.connect(owner).removeIToken(ethers.constants.Zero))
                 .to.emit(Registry, "ITokenRemoved")
                 .withArgs(iTokens[0], owner.address);
-        });
-    });
-
-    describe("Whitelist User function", async () => {
-        it("Should revert when trying to whitelist already whitelisted user", async () => {
-            await expect(Registry.connect(owner).whitelistUser(alice.address)).to.be.revertedWith(
-                "Already whitelisted",
-            );
-        });
-
-        it("Should whitelist a user", async () => {
-            await Registry.connect(owner).whitelistUser(charlie.address);
-
-            expect(await Registry.whitelisted(charlie.address)).to.equal(true);
-        });
-
-        it("Shouldn't whitelist extra user", async () => {
-            await Registry.connect(owner).whitelistUser(charlie.address);
-
-            expect(await Registry.whitelisted(rosa.address)).to.equal(false);
         });
     });
 
