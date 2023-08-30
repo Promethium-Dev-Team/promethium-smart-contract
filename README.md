@@ -8,7 +8,7 @@ This repository contains smart contracts of promethium rebalancer
 npm install
 ```
 
-## Usage
+## Testing
 
 ```
 npx hardhat test
