@@ -32,7 +32,6 @@ contract Registry is RBAC {
         address[] memory _positions,
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
-        address _autocompoundMatrixProvider,
         address _priceRouter,
         address[] memory _whitelist
     ) {
@@ -45,7 +44,6 @@ contract Registry is RBAC {
             addIToken(_iTokens[i]);
         }
         grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
-        grantRole(AUTOCOMPOUND_PROVIDER_ROLE, _autocompoundMatrixProvider);
 
         for (uint256 i = 0; i < _whitelist.length; i++) {
             grantRole(WHITELISTED_ROLE, _whitelist[i]);

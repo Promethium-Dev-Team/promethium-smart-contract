@@ -26,10 +26,8 @@ describe("Registry contract", async () => {
     let rosa: SignerWithAddress;
     let owner: SignerWithAddress;
     let rebalanceMatrixProvider: SignerWithAddress;
-    let autocompoundMatrixProvider: SignerWithAddress;
 
     let REBALANCE_PROVIDER_ROLE: string;
-    let AUTOCOMPOUND_PROVIDER_ROLE: string;
 
     let notOwnerRevertString: string;
     let allreadyAddedPositionRevertString: string;
@@ -42,8 +40,7 @@ describe("Registry contract", async () => {
     let iTokensAmountLimit: number;
 
     before(async () => {
-        [owner, alice, bob, charlie, rosa, rebalanceMatrixProvider, autocompoundMatrixProvider] =
-            await ethers.getSigners();
+        [owner, alice, bob, charlie, rosa, rebalanceMatrixProvider] = await ethers.getSigners();
 
         USDT = await new ERC20token__factory(bob).deploy("Tether USD", "USDT");
         USDC = await new ERC20token__factory(charlie).deploy("USD coint", "USDC");
@@ -68,13 +65,11 @@ describe("Registry contract", async () => {
 
     beforeEach(async () => {
         REBALANCE_PROVIDER_ROLE = "0x524542414c414e43455f50524f56494445525f524f4c45000000000000000000";
-        AUTOCOMPOUND_PROVIDER_ROLE = "0x4155544f434f4d504f554e445f50524f56494445525f524f4c45000000000000";
 
         Registry = await new Registry__factory(owner).deploy(
             positions,
             iTokens,
             rebalanceMatrixProvider.address,
-            autocompoundMatrixProvider.address,
             priceRouter.address,
             whitelist,
         );
@@ -105,14 +100,6 @@ describe("Registry contract", async () => {
 
         it("Should set the correct rebalancer role after", async () => {
             expect(await Registry.hasRole(REBALANCE_PROVIDER_ROLE, rebalanceMatrixProvider.address)).to.equal(true);
-            expect(await Registry.hasRole(REBALANCE_PROVIDER_ROLE, autocompoundMatrixProvider.address)).to.equal(false);
-        });
-
-        it("Should set the correct autocompound role after", async () => {
-            expect(await Registry.hasRole(AUTOCOMPOUND_PROVIDER_ROLE, autocompoundMatrixProvider.address)).to.equal(
-                true,
-            );
-            expect(await Registry.hasRole(AUTOCOMPOUND_PROVIDER_ROLE, rebalanceMatrixProvider.address)).to.equal(false);
         });
 
         it("Should set price router address", async () => {

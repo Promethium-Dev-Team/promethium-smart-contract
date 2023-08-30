@@ -26,7 +26,6 @@ describe("Rebalancer contract", async () => {
     let rosa: SignerWithAddress;
     let owner: SignerWithAddress;
     let rebalanceMatrixProvider: SignerWithAddress;
-    let autocompoundMatrixProvider: SignerWithAddress;
 
     let REBALANCE_PROVIDER_ROLE: string;
     let AUTOCOMPOUND_PROVIDER_ROLE: string;
@@ -48,8 +47,7 @@ describe("Rebalancer contract", async () => {
     let bobDepositValue: BigNumber;
 
     before(async () => {
-        [owner, alice, bob, charlie, rosa, rebalanceMatrixProvider, autocompoundMatrixProvider] =
-            await ethers.getSigners();
+        [owner, alice, bob, charlie, rosa, rebalanceMatrixProvider] = await ethers.getSigners();
 
         USDT = await new ERC20token__factory(bob).deploy("Tether USD", "USDT");
         USDC = await new ERC20token__factory(charlie).deploy("USD coint", "USDC");
@@ -87,7 +85,6 @@ describe("Rebalancer contract", async () => {
 
     beforeEach(async () => {
         REBALANCE_PROVIDER_ROLE = "0x524542414c414e43455f50524f56494445525f524f4c45000000000000000000";
-        AUTOCOMPOUND_PROVIDER_ROLE = "0x4155544f434f4d504f554e445f50524f56494445525f524f4c45000000000000";
         Rebalancer = await new Rebalancer__factory(owner).deploy(
             USDT.address,
             "Promethium USDT",
@@ -95,7 +92,6 @@ describe("Rebalancer contract", async () => {
             positions,
             iTokens,
             rebalanceMatrixProvider.address,
-            autocompoundMatrixProvider.address,
             priceRouter.address,
             whitelist,
             poolSizeLimit,
@@ -631,4 +627,6 @@ describe("Rebalancer contract", async () => {
             expect(rebalancerFees[2]).to.equal(newFee.treasury);
         });
     });
+
+    describe("Set pool limit function", async () => {});
 });

@@ -31,10 +31,6 @@ describe("RBAC contract", async () => {
             expect(await RBAC.REBALANCE_PROVIDER_ROLE()).to.equal(REBALANCE_PROVIDER_ROLE);
         });
 
-        it("Should return the correct autocompound provider role", async () => {
-            expect(await RBAC.AUTOCOMPOUND_PROVIDER_ROLE()).to.equal(AUTOCOMPOUND_PROVIDER_ROLE);
-        });
-
         it("Should return the correct whitelisted role", async () => {
             expect(await RBAC.WHITELISTED_ROLE()).to.equal(WHITELISTED_ROLE);
         });

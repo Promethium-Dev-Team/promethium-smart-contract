@@ -41,14 +41,13 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address[] memory _positions,
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
-        address _autocompoundMatrixProvider,
         address _router,
         address[] memory _whitelist,
         uint256 _poolLimitSize
     )
         ERC4626(IERC20(_asset))
         ERC20(_name, _symbol)
-        Registry(_positions, _iTokens, _rebalanceMatrixProvider, _autocompoundMatrixProvider, _router, _whitelist)
+        Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist)
     {
         FeeData = DataTypes.feeData({performanceFee: 0.1 * 1e18, withdrawFee: 0.001 * 1e18, treasury: msg.sender});
         poolLimitSize = _poolLimitSize;
@@ -131,7 +130,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     /**
      * @notice  allows user to request the token withdrawal if the amount of underlying asset is not enougth on the vault
      * @dev     shares shouldn't be burned but user can't use them in any other way
-     * @param   shares  amount of shares user withdraw during next rebalance
+     * @param   shares  amount of shares user will redeem during next rebalance
      */
     function requestWithdraw(uint256 shares) public nonReentrant {
         require(shares <= maxRedeem(msg.sender), "ERC4626: withdraw more than max");
