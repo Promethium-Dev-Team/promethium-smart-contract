@@ -1,27 +1,25 @@
 module.exports = [
-    "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8", //asset
-    "Promethium USDC.e", //name
-    "pmUSDC", //symbol
+    "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", //asset
+    "Promethium USDT", //name
+    "pmUSDT", //symbol
     [
         //positions
         "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
         "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
         "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
-        "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+        "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
     ],
     [
         //ibtokens
-        "0x48a29e756cc1c097388f3b2f3b570ed270423b3d",
-        "0x8dc3312c68125a94916d62B97bb5D925f84d4aE0",
-        "0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b",
-        "0x6C4CB1115927D50E495E554d38b83f2973F05361",
-        "0x625E7708f30cA75bfd92586e17077590C60eb4cD",
-        "0xa5edbdd9646f8dff606d7448e414884c7d905dca",
-        "0x1ca530f02DD0487cef4943c674342c5aEa08922F",
-        "0x068485a0f964B4c3D395059a19A05a8741c48B4E",
+        "0xd69d402d1bdb9a2b8c3d88d98b9ceaf9e4cd72d9",
+        "0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9",
+        "0xB65Ab7e1c6c1Ba202baed82d6FB71975D56F007C",
+        "0x66ddD8F3A0C4CEB6a324376EA6C00B4c8c1BB3d9",
+        "0x6ab707aca953edaefbc4fd23ba73294241490620",
+        "0x9365181A7df82a1cC578eAE443EFd89f00dbb643",
+        "0x4A5806A3c4fBB32F027240F80B18b26E40BF7E31",
     ],
-    "0x993Ad4736DF9571DD096Afb303A7d4e6564A46F6", //rebalancer
-    "0x993Ad4736DF9571DD096Afb303A7d4e6564A46F6", //autocompounder
+    "0xD7750516aA8D2222a1D39325D3F98e6559D3f6fB", //rebalanceProvider
     "0xbd2120c7dd88f564a8850050621b3af608a7b685", //router
     [
         "0x3597C1B68ea0185530fFe29b84C9E56c8eae46D1", //whitelist
