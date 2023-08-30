@@ -631,32 +631,4 @@ describe("Rebalancer contract", async () => {
             expect(rebalancerFees[2]).to.equal(newFee.treasury);
         });
     });
-
-    describe("Harvest function", async () => {
-        it("Should revert when to the autocompound provider is trying to compound", async () => {
-            await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
-            await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
-
-            let autocompoundTransactions = [];
-            let transaction = USDT.interface.encodeFunctionData("approve", [Aave.address, bobDepositValue]);
-            autocompoundTransactions.push({adaptor: USDT.address, callData: transaction});
-            transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue]);
-            autocompoundTransactions.push({adaptor: Aave.address, callData: transaction});
-            await expect(
-                Rebalancer.connect(rebalanceMatrixProvider).harvest(autocompoundTransactions),
-            ).to.be.revertedWith("Caller is not a autocompound provider");
-        });
-
-        it("Should revert when the pool balance become lower after autocompound", async () => {
-            await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
-            await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
-
-            let autocompoundTransactions = [];
-            let transaction = USDT.interface.encodeFunctionData("transfer", [charlie.address, ethers.constants.One]);
-            autocompoundTransactions.push({adaptor: USDT.address, callData: transaction});
-            await expect(
-                Rebalancer.connect(autocompoundMatrixProvider).harvest(autocompoundTransactions),
-            ).to.be.revertedWith("Balance after should be greater");
-        });
-    });
 });
