@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Registry.sol";
 
 contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
-    event Harvest(address caller, uint256 totalIncome);
     event Rebalance();
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
     event FeesCharged(address treasury, uint256 amount);
@@ -108,20 +107,6 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      */
     function maxWithdraw(address owner) public view override returns (uint256) {
         return _convertToAssets(maxRedeem(owner), Math.Rounding.Down);
-    }
-
-    /**
-     * @notice execute autocompound
-     * @dev     the amount of tokens converted to underlying should not become lower after autocompound
-     * @param   autocompoundMatrix  transactions which contract should execute
-     */
-    function harvest(DataTypes.AdaptorCall[] memory autocompoundMatrix) external nonReentrant onlyAutocompoundProvider {
-        uint256 balanceBefore = totalAssets();
-        _executeTransactions(autocompoundMatrix);
-        uint256 balanceAfter = totalAssets();
-        require(balanceBefore < balanceAfter, "Balance after should be greater");
-
-        emit Harvest(msg.sender, balanceAfter - balanceBefore);
     }
 
     /**
@@ -274,6 +259,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     }
 
     function setPoolLimit(uint256 newLimit) public onlyOwner {
+        require(newLimit > poolLimitSize, "New limit should be greater");
         poolLimitSize = newLimit;
 
         emit SetPoolLimit(newLimit);
