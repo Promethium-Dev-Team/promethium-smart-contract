@@ -18,7 +18,7 @@ contract Registry is RBAC {
 
     bool public depositsPaused;
 
-    IPriceRouter public router;
+    IPriceRouter public immutable router;
 
     mapping(address => bool) public isAdaptorSetup;
 
