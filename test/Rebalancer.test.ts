@@ -466,7 +466,7 @@ describe("Rebalancer contract", async () => {
             expect((await Rebalancer.withdrawQueue(0)).id).to.equal(ethers.constants.Two);
         });
 
-        it("Should amit after a completing a request", async () => {
+        it("Should emit after a completing a request", async () => {
             await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
 
@@ -485,7 +485,7 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
             await expect(Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions)).to.emit(
                 Rebalancer,
-                "WithdrawalCompleted",
+                "WithdrawRequested",
             );
         });
 
