@@ -49,8 +49,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         ERC20(_name, _symbol)
         Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist)
     {
-        FeeData = DataTypes.feeData({performanceFee: 0.1 * 1e18, withdrawFee: 0.001 * 1e18, treasury: msg.sender});
-        poolLimitSize = _poolLimitSize;
+        setFee(DataTypes.feeData(0.1 * 1e18, 0.001 * 1e18, msg.sender));
+        setPoolLimit(_poolLimitSize);
     }
 
     /**
