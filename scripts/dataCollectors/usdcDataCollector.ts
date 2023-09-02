@@ -9,25 +9,25 @@ import {
     IRadiantV2__factory,
     ITender__factory,
     IWePiggy__factory,
-} from "../typechain-types";
+} from "../../typechain-types";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
-const path = "./arbAugust_5-19.csv";
+const path = "./arbAugust_1-31_USDC.csv";
 
 let signer: SignerWithAddress;
 const secsInYear = 60 * 60 * 24 * 365;
 
-let startBlock: number = 118421395;
-let finishBlock: number = 122943700;
-let blockDistance = 2243;
+let startBlock: number = 116911530;
+let finishBlock: number = 126855341;
+let blockDistance = 2227;
 
-let rates: number[] = [0, 0, 0, 0, 0, 0, 0];
+let rates: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
 
 export const getAAVEAPR = async (
     blockNumber?: number,
     contractAddress: string = "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
-    asset: string = "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+    asset: string = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
 ) => {
     const contract = AAVEV3__factory.connect(contractAddress, signer);
 
@@ -41,8 +41,7 @@ export const getAAVEAPR = async (
 
 export const getDForceAPR = async (
     blockNumber?: number,
-    contractAddress: string = "0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9",
-    asset: string = "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+    contractAddress: string = "0x8dc3312c68125a94916d62B97bb5D925f84d4aE0",
 ) => {
     const contract = Idforce__factory.connect(contractAddress, signer);
 
@@ -54,7 +53,7 @@ export const getDForceAPR = async (
 export const getGranaryAPR = async (
     blockNumber?: number,
     contractAddress: string = "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
-    asset: string = "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+    asset: string = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
 ) => {
     const contract = IGranary__factory.connect(contractAddress, signer);
 
@@ -70,8 +69,7 @@ export const getGranaryAPR = async (
 
 export const getLodestarAPR = async (
     blockNumber?: number,
-    contractAddress: string = "0x9365181A7df82a1cC578eAE443EFd89f00dbb643",
-    asset: string = "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+    contractAddress: string = "0x1ca530f02DD0487cef4943c674342c5aEa08922F",
 ) => {
     const contract = ILodestar__factory.connect(contractAddress, signer);
 
@@ -83,7 +81,7 @@ export const getLodestarAPR = async (
 export const getRadiantV2APR = async (
     blockNumber?: number,
     contractAddress: string = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
-    asset: string = "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+    asset: string = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
 ) => {
     const contract = IRadiantV2__factory.connect(contractAddress, signer);
 
@@ -99,7 +97,7 @@ export const getRadiantV2APR = async (
 
 export const getTenderAPR = async (
     blockNumber?: number,
-    contractAddress: string = "0x4A5806A3c4fBB32F027240F80B18b26E40BF7E31",
+    contractAddress: string = "0x068485a0f964B4c3D395059a19A05a8741c48B4E",
 ) => {
     const contract = ITender__factory.connect(contractAddress, signer);
 
@@ -110,11 +108,26 @@ export const getTenderAPR = async (
 
 export const getWePiggyAPR = async (
     blockNumber?: number,
-    contractAddress: string = "0xB65Ab7e1c6c1Ba202baed82d6FB71975D56F007C",
+    contractAddress: string = "0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b",
 ) => {
     const contract = IWePiggy__factory.connect(contractAddress, signer);
 
     const apr = (await contract.supplyRatePerBlock({blockTag: blockNumber})).mul(secsInYear).div(15);
+
+    return bigNumberishToNumberWithDecimals(apr, 18);
+};
+
+export const getCompoundAPR = async (
+    blockNumber?: number,
+    contractAddress: string = "0xa5edbdd9646f8dff606d7448e414884c7d905dca",
+) => {
+    const contract = ICompound__factory.connect(contractAddress, signer);
+
+    const utilization = await contract.getUtilization({
+        blockTag: blockNumber,
+    });
+
+    const apr = (await contract.getSupplyRate(utilization, {blockTag: blockNumber})).mul(BigNumber.from(secsInYear));
 
     return bigNumberishToNumberWithDecimals(apr, 18);
 };
@@ -153,6 +166,9 @@ function getProtocolName(protocolId: number) {
     else if (protocolId == 4) return "RADIANTV2";
     else if (protocolId == 5) return "TENDER";
     else if (protocolId == 6) return "WEPIGGY";
+    else if (protocolId == 7) return "COMPOUND";
+
+    return "invalid ID";
 }
 
 const csvWriter = createCsvWriter({
@@ -167,9 +183,11 @@ const csvWriter = createCsvWriter({
         {id: "RadiantV2", title: "RadiantV2 Supply APY"},
         {id: "Tender", title: "Tender Supply APY"},
         {id: "WePiggy", title: "WePiggy Supply APY"},
+        {id: "Compound", title: "Compound Supply APY"},
 
         {id: "balance", title: "protocol balance"},
         {id: "placement", title: "Protocol placement"},
+        {id: "placementId", title: "protocol placement id"},
     ],
 });
 
@@ -204,6 +222,8 @@ async function main() {
 
         rates[6] = await getWePiggyAPR(currentBlockNumber);
 
+        rates[7] = await getCompoundAPR(currentBlockNumber);
+
         if (i % 6 == 0) {
             rebalancerPlacement = getMostProfitableStrategy();
         }
@@ -222,9 +242,11 @@ async function main() {
                 RadiantV2: convertToAPY(rates[4]) * 100,
                 Tender: convertToAPY(rates[5]) * 100,
                 WePiggy: convertToAPY(rates[6]) * 100,
+                Compound: convertToAPY(rates[7]) * 100,
 
                 balance: rebalancerBalance,
                 placement: getProtocolName(rebalancerPlacement),
+                placementId: rebalancerPlacement + 1,
             },
         ];
         csvWriter.writeRecords(records);
