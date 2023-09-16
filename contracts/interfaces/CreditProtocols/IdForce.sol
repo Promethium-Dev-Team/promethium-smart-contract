@@ -24,4 +24,28 @@ interface Idforce {
      * @param _redeemUnderlying The number of underlying to redeem.
      */
     function redeemUnderlying(address _from, uint256 _redeemUnderlying) external;
+
+    /**
+     * @notice Get cash balance of this cToken in the underlying asset
+     * @return The quantity of underlying asset owned by this contract
+     */
+    function getCash() external view returns (uint);
+
+    /**
+     * @dev
+     * @notice Total amount of reserves of the underlying held in this market
+     */
+    function totalReserves() external view returns (uint256);
+
+    /**
+     * @dev
+     * @notice Total amount of outstanding borrows of the underlying in this market
+     */
+    function totalBorrows() external view returns (uint256);
+
+    function reserveRatio() external view returns (uint256);
+
+    function totalSupply() external view returns (uint256);
+
+    function exchangeRateStored() external view returns (uint256);
 }

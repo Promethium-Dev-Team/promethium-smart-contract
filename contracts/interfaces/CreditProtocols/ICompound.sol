@@ -28,4 +28,18 @@ interface ICompound {
      * @param amount The quantity to withdraw
      */
     function withdraw(address asset, uint amount) external;
+
+    /**
+     * @notice Get the total amount of debt
+     * @dev Note: uses updated interest indices to calculate
+     * @return The amount of debt
+     **/
+    function totalBorrow() external view returns (uint256);
+
+    /**
+     * @notice Get the total number of tokens in circulation
+     * @dev Note: uses updated interest indices to calculate
+     * @return The supply of tokens
+     **/
+    function totalSupply() external view returns (uint256);
 }
