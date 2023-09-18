@@ -300,7 +300,7 @@ async function main() {
         }
         console.log("sum", sum);
         if (sum.gt(totalTokens)) {
-            l = rate;
+            l = rate.add(1);
         } else {
             r = rate;
         }
