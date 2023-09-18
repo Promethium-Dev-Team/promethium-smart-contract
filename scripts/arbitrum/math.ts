@@ -194,7 +194,7 @@ export const getWePiggyAPR = async (deposit: BigNumber) => {
         .div(15);
 };
 
-export const getCompoundRate = async (deposit: BigNumber) => {
+export const getCompoundAPR = async (deposit: BigNumber) => {
     const compoundTotalSupply = compoundSupply.add(deposit);
     const compoundUtilization = compoundTotalBorrow.mul(ethers.utils.parseUnits("1", 18)).div(compoundTotalSupply);
 
@@ -261,7 +261,7 @@ async function main() {
     console.log(await bigNumberishToNumberWithDecimals(await getTenderAPR(ethers.utils.parseUnits("1000", 6)), 18)); //76322580819708939 7629394531
 
     let rates: BigNumber[] = [];
-    rates.push(await getCompoundRate(BigNumber.from(0)));
+    rates.push(await getCompoundAPR(BigNumber.from(0)));
     rates.push(await getWePiggyAPR(BigNumber.from(0)));
     rates.push(await getTenderAPR(BigNumber.from(0)));
     rates.push(await getLodestarAPR(BigNumber.from(0)));
@@ -285,7 +285,7 @@ async function main() {
         requiredDeposits = [];
         let rate = l.add(r).div(2);
         console.log("trying to make this percent: ", (await bigNumberishToNumberWithDecimals(rate, 18)) * 100);
-        requiredDeposits.push(await getRequiredDeposit(getCompoundRate, rate));
+        requiredDeposits.push(await getRequiredDeposit(getCompoundAPR, rate));
         requiredDeposits.push(await getRequiredDeposit(getWePiggyAPR, rate));
         requiredDeposits.push(await getRequiredDeposit(getTenderAPR, rate));
         requiredDeposits.push(await getRequiredDeposit(getLodestarAPR, rate));
@@ -311,7 +311,7 @@ async function main() {
     console.log("rate found", await bigNumberishToNumberWithDecimals(l, 18));
     console.log("requiredDeposits", requiredDeposits);
 
-    console.log(await bigNumberishToNumberWithDecimals(await getCompoundRate(requiredDeposits[0]), 18));
+    console.log(await bigNumberishToNumberWithDecimals(await getCompoundAPR(requiredDeposits[0]), 18));
     console.log(await bigNumberishToNumberWithDecimals(await getWePiggyAPR(requiredDeposits[1]), 18));
     console.log(await bigNumberishToNumberWithDecimals(await getTenderAPR(requiredDeposits[2]), 18));
     console.log(await bigNumberishToNumberWithDecimals(await getLodestarAPR(requiredDeposits[3]), 18));
