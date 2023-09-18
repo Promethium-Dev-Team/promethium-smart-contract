@@ -216,7 +216,7 @@ export const getRequiredDeposit = async (getRate: (x: BigNumber) => Promise<BigN
     let l = ethers.utils.parseUnits("0", 0);
     let r = ethers.utils.parseUnits("1", 15);
 
-    while (l < r) {
+    while (r.gt(l)) {
         let mid = l.add(r).div(2);
         if ((await getRate(mid)).gt(rate)) {
             l = mid.add(1);
@@ -281,7 +281,7 @@ async function main() {
 
     let requiredDeposits: BigNumber[] = [];
     let threshold = ethers.utils.parseUnits("1", 10);
-    while (r.sub(l).gt(threshold)) {
+    while (r.gt(l)) {
         requiredDeposits = [];
         let rate = l.add(r).div(2);
         console.log("trying to make this percent: ", (await bigNumberishToNumberWithDecimals(rate, 18)) * 100);
@@ -310,6 +310,12 @@ async function main() {
     }
     console.log("rate found", await bigNumberishToNumberWithDecimals(l, 18));
     console.log("requiredDeposits", requiredDeposits);
+
+    console.log(await bigNumberishToNumberWithDecimals(await getCompoundRate(requiredDeposits[0]), 18));
+    console.log(await bigNumberishToNumberWithDecimals(await getWePiggyAPR(requiredDeposits[1]), 18));
+    console.log(await bigNumberishToNumberWithDecimals(await getTenderAPR(requiredDeposits[2]), 18));
+    console.log(await bigNumberishToNumberWithDecimals(await getLodestarAPR(requiredDeposits[3]), 18));
+    console.log(await bigNumberishToNumberWithDecimals(await getDForceAPR(requiredDeposits[4]), 18));
 }
 
 main()
