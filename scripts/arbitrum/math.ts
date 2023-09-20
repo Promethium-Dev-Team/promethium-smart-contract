@@ -149,9 +149,9 @@ export const initialize = async () => {
     tenderBorrows = await tenderContract.totalBorrows();
     tenderReserves = await tenderContract.totalReserves();
     tenderReserveFactorMantissa = await tenderContract.reserveFactorMantissa();
-    dForceTotalSupply = await dForceContract.totalSupply();
-    dForceExchangeRate = await dForceContract.exchangeRateStored();
-    dForceUnderlying = dForceTotalSupply.mul(dForceExchangeRate);
+    // dForceTotalSupply = await dForceContract.totalSupply();
+    // dForceExchangeRate = await dForceContract.exchangeRateStored();
+    // dForceUnderlying = dForceTotalSupply.mul(dForceExchangeRate);
 
     wePiggyModel = IWePiggyModel__factory.connect("0x5676eb997c30140606965cebd4ca829ab89a6cac", signer);
     wePiggyContract = IWePiggy__factory.connect("0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b", signer);
@@ -159,9 +159,9 @@ export const initialize = async () => {
     wePiggyBorrows = await wePiggyContract.totalBorrows();
     wePiggyReserves = await wePiggyContract.totalReserves();
     wePiggyReserveFactorMantissa = await wePiggyContract.reserveFactorMantissa();
-    dForceTotalSupply = await dForceContract.totalSupply();
-    dForceExchangeRate = await dForceContract.exchangeRateStored();
-    dForceUnderlying = dForceTotalSupply.mul(dForceExchangeRate);
+    // dForceTotalSupply = await dForceContract.totalSupply();
+    // dForceExchangeRate = await dForceContract.exchangeRateStored();
+    // dForceUnderlying = dForceTotalSupply.mul(dForceExchangeRate);
 
     compound = ICompound__factory.connect("0xa5edbdd9646f8dff606d7448e414884c7d905dca", signer);
     compoundSupplyPerSecondInterestRateBase = BigNumber.from(0);
@@ -184,7 +184,6 @@ export const getDForceAPR = async (deposit: BigNumber) => {
     } else if (grossSupply.lte(dForceReserves)) {
         util = scaleFactor;
     } else if (dForceBorrows.gt(dForceTotalSupply)) {
-        console.log("here");
         util = scaleFactor;
     } else {
         util = dForceBorrows.mul(scaleFactor).div(supply);
@@ -212,40 +211,31 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 
 export const getLodestarAPR = async (deposit: BigNumber) => {
     lodestarCash = lodestarCash.add(deposit);
+    let oneMinusReserveFactor = scaleFactor.sub(lodestarReserveFactorMantissa);
 
-    //getting utilization
+    //borrow
     let util: BigNumber;
-    let grossSupply = lodestarCash.add(lodestarBorrows);
-    let supply = grossSupply.sub(lodestarReserves);
     if (lodestarBorrows.eq(BigNumber.from(0))) {
         util = BigNumber.from(0);
-    } else if (grossSupply.lte(lodestarReserves)) {
-        util = scaleFactor;
-    } else if (lodestarBorrows.gt(dForceTotalSupply)) {
-        console.log("here");
-        util = scaleFactor;
     } else {
-        util = dForceBorrows.mul(scaleFactor).div(supply);
+        util = lodestarBorrows.mul(scaleFactor).div(lodestarCash.add(lodestarBorrows).sub(lodestarReserves));
     }
-    const optimal = ethers.utils.parseUnits("9", 17);
-    const slope_1 = ethers.utils.parseUnits("5", 16);
-    const slope_2 = ethers.utils.parseUnits("6", 17);
-    let annualBorrowRateScaled: BigNumber;
-    if (util < optimal) {
-        annualBorrowRateScaled = slope_1.mul(util).div(optimal);
+    const kink = ethers.utils.parseUnits("8", 17);
+    const multiplierPerBlock = BigNumber.from(47564687975);
+    let jumpMultiplierPerBlock = BigNumber.from(47564687975);
+    let borrowRate: BigNumber;
+    if (util.lte(kink)) {
+        borrowRate = util.mul(multiplierPerBlock).div(scaleFactor);
     } else {
-        annualBorrowRateScaled = slope_1.add(slope_2.mul(util.sub(optimal)).div(scaleFactor.sub(optimal)));
+        let normalRate = kink.mul(multiplierPerBlock).div(scaleFactor);
+        let excessUtil = util.sub(kink);
+        borrowRate = excessUtil.mul(jumpMultiplierPerBlock).div(scaleFactor).add(normalRate);
     }
 
-    const blockPerYear = BigNumber.from(2425846);
-    const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
+    let rateToPool = borrowRate.mul(oneMinusReserveFactor).div(scaleFactor);
+    let blocksPerYear = BigNumber.from(2628000);
 
-    return dForceBorrowAPR
-        .mul(scaleFactor.sub(dForceReserveFactorMantissa))
-        .mul(dForceBorrows)
-        .div(dForceUnderlying)
-        .mul(secsInYear)
-        .div(13);
+    return util.mul(rateToPool).mul(blocksPerYear).div(scaleFactor);
 };
 
 export const getTenderAPR = async (deposit: BigNumber) => {

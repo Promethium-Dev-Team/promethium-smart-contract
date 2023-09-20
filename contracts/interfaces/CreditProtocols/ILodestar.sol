@@ -55,4 +55,10 @@ interface ILodestar {
      * @notice Total amount of outstanding borrows of the underlying in this market
      */
     function totalBorrows() external view returns (uint256);
+
+    function reserveRatio() external view returns (uint256);
+
+    function totalSupply() external view returns (uint256);
+
+    function exchangeRateStored() external view returns (uint256);
 }
