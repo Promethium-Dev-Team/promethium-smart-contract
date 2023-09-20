@@ -136,6 +136,9 @@ export const initialize = async () => {
     lodestarBorrows = await lodestarContract.totalBorrows();
     lodestarReserves = await lodestarContract.totalReserves();
     lodestarReserveFactorMantissa = await lodestarContract.reserveFactorMantissa();
+    lodestarTotalSupply = await lodestarContract.totalSupply();
+    lodestarExchangeRate = await lodestarContract.exchangeRateStored();
+    lodestarUnderlying = lodestarTotalSupply.mul(lodestarExchangeRate);
 
     tenderModel = ITenderModel__factory.connect("0xa738b4910b0a93583a7e3e56d73467fe7c538158", signer);
     tenderContract = ITender__factory.connect("0x068485a0f964B4c3D395059a19A05a8741c48B4E", signer);
@@ -143,6 +146,9 @@ export const initialize = async () => {
     tenderBorrows = await tenderContract.totalBorrows();
     tenderReserves = await tenderContract.totalReserves();
     tenderReserveFactorMantissa = await tenderContract.reserveFactorMantissa();
+    dForceTotalSupply = await dForceContract.totalSupply();
+    dForceExchangeRate = await dForceContract.exchangeRateStored();
+    dForceUnderlying = dForceTotalSupply.mul(dForceExchangeRate);
 
     wePiggyModel = IWePiggyModel__factory.connect("0x5676eb997c30140606965cebd4ca829ab89a6cac", signer);
     wePiggyContract = IWePiggy__factory.connect("0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b", signer);
@@ -150,6 +156,9 @@ export const initialize = async () => {
     wePiggyBorrows = await wePiggyContract.totalBorrows();
     wePiggyReserves = await wePiggyContract.totalReserves();
     wePiggyReserveFactorMantissa = await wePiggyContract.reserveFactorMantissa();
+    dForceTotalSupply = await dForceContract.totalSupply();
+    dForceExchangeRate = await dForceContract.exchangeRateStored();
+    dForceUnderlying = dForceTotalSupply.mul(dForceExchangeRate);
 
     compound = ICompound__factory.connect("0xa5edbdd9646f8dff606d7448e414884c7d905dca", signer);
     compoundSupplyPerSecondInterestRateBase = BigNumber.from(0);
@@ -189,7 +198,7 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 
     const blockPerYear = BigNumber.from(2425846);
     const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
-    
+
     return dForceBorrowAPR
         .mul(scaleFactor.sub(dForceReserveFactorMantissa))
         .mul(dForceBorrows)
@@ -199,10 +208,41 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 };
 
 export const getLodestarAPR = async (deposit: BigNumber) => {
-    const lodestarTotalCash = lodestarCash.add(deposit);
-    return (await lodestarModel.getSupplyRate(lodestarTotalCash, lodestarBorrows, lodestarReserves, lodestarReserveFactorMantissa))
+    lodestarCash = lodestarCash.add(deposit);
+
+    //getting utilization
+    let util: BigNumber;
+    let grossSupply = lodestarCash.add(lodestarBorrows);
+    let supply = grossSupply.sub(lodestarReserves);
+    if (lodestarBorrows.eq(BigNumber.from(0))) {
+        util = BigNumber.from(0);
+    } else if (grossSupply.lte(lodestarReserves)) {
+        util = scaleFactor;
+    } else if (lodestarBorrows.gt(dForceTotalSupply)) {
+        console.log("here");
+        util = scaleFactor;
+    } else {
+        util = dForceBorrows.mul(scaleFactor).div(supply);
+    }
+    const optimal = ethers.utils.parseUnits("9", 17);
+    const slope_1 = ethers.utils.parseUnits("5", 16);
+    const slope_2 = ethers.utils.parseUnits("6", 17);
+    let annualBorrowRateScaled: BigNumber;
+    if (util < optimal) {
+        annualBorrowRateScaled = slope_1.mul(util).div(optimal);
+    } else {
+        annualBorrowRateScaled = slope_1.add(slope_2.mul(util.sub(optimal)).div(scaleFactor.sub(optimal)));
+    }
+
+    const blockPerYear = BigNumber.from(2425846);
+    const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
+
+    return dForceBorrowAPR
+        .mul(scaleFactor.sub(dForceReserveFactorMantissa))
+        .mul(dForceBorrows)
+        .div(dForceUnderlying)
         .mul(secsInYear)
-        .div(12);
+        .div(13);
 };
 
 export const getTenderAPR = async (deposit: BigNumber) => {
@@ -224,7 +264,7 @@ export const getCompoundAPR = async (deposit: BigNumber) => {
     const compoundTotalSupply = compoundSupply.add(deposit);
     const compoundUtilization = compoundTotalBorrow.mul(ethers.utils.parseUnits("1", 18)).div(compoundTotalSupply);
 
-    if (compoundUtilization < compoundSupplyKink) {
+    if (compoundUtilization.lt(compoundSupplyKink)) {
         return compoundSupplyPerSecondInterestRateBase
             .add(compoundSupplyPerSecondInterestRateSlopeLow.mul(compoundUtilization))
             .mul(secsInYear)
