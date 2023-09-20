@@ -161,9 +161,38 @@ export const initialize = async () => {
 };
 
 export const getDForceAPR = async (deposit: BigNumber) => {
-    const dForceTotalCash = dForceCash.add(deposit);
+    dForceCash = dForceCash.add(deposit);
 
-    const dForceBorrowAPR = await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
+    //getting utilization
+    let util: BigNumber;
+    let grossSupply = dForceCash.add(dForceBorrows);
+    let supply = grossSupply.sub(dForceReserves);
+    if (dForceBorrows.eq(BigNumber.from(0))) {
+        util = BigNumber.from(0);
+    } else if (grossSupply.lte(dForceReserves)) {
+        util = scaleFactor;
+    } else if (dForceBorrows.gt(dForceTotalSupply)) {
+        console.log("here");
+        util = scaleFactor;
+    } else {
+        util = dForceBorrows.mul(scaleFactor).div(supply);
+    }
+    console.log(dForceBorrows);
+    console.log(dForceTotalSupply);
+    console.log(util);
+    const optimal = ethers.utils.parseUnits("9", 17);
+    const slope_1 = ethers.utils.parseUnits("5", 16);
+    const slope_2 = ethers.utils.parseUnits("6", 17);
+    let annualBorrowRateScaled: BigNumber;
+    if (util < optimal) {
+        annualBorrowRateScaled = slope_1.mul(util).div(optimal);
+    } else {
+        annualBorrowRateScaled = slope_1.add(slope_2.mul(util.sub(optimal)).div(scaleFactor.sub(optimal)));
+    }
+
+    const blockPerYear = BigNumber.from(2425846);
+    const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
+    console.log(annualBorrowRateScaled);
     return dForceBorrowAPR
         .mul(scaleFactor.sub(dForceReserveFactorMantissa))
         .mul(dForceBorrows)
