@@ -177,9 +177,6 @@ export const getDForceAPR = async (deposit: BigNumber) => {
     } else {
         util = dForceBorrows.mul(scaleFactor).div(supply);
     }
-    console.log(dForceBorrows);
-    console.log(dForceTotalSupply);
-    console.log(util);
     const optimal = ethers.utils.parseUnits("9", 17);
     const slope_1 = ethers.utils.parseUnits("5", 16);
     const slope_2 = ethers.utils.parseUnits("6", 17);
@@ -192,7 +189,7 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 
     const blockPerYear = BigNumber.from(2425846);
     const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
-    console.log(annualBorrowRateScaled);
+    
     return dForceBorrowAPR
         .mul(scaleFactor.sub(dForceReserveFactorMantissa))
         .mul(dForceBorrows)
