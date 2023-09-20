@@ -38,6 +38,9 @@ let lodestarCash: BigNumber;
 let lodestarBorrows: BigNumber;
 let lodestarReserves: BigNumber;
 let lodestarReserveFactorMantissa: BigNumber;
+let lodestarTotalSupply: BigNumber;
+let lodestarExchangeRate: BigNumber;
+let lodestarUnderlying: BigNumber;
 
 let tenderModel: Contract;
 let tenderContract: Contract;
