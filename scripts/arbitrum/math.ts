@@ -17,7 +17,7 @@ import {
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 let signer: SignerWithAddress;
 
-let totalTokens = ethers.utils.parseUnits("1000000", 6);
+let totalTokens = ethers.utils.parseUnits("10000000", 6);
 
 const secsInYear = 60 * 60 * 24 * 365;
 const scaleFactor = ethers.utils.parseUnits("1", 18);
@@ -171,7 +171,7 @@ export const getDForceAPR = async (deposit: BigNumber) => {
         util = BigNumber.from(0);
     } else if (grossSupply.lte(dForceReserves)) {
         util = scaleFactor;
-    } else if (dForceBorrows.gt(dForceTotalSupply)) {
+    } else if (dForceBorrows.gt(dForceTotalSupply.add(deposit))) {
         util = scaleFactor;
     } else {
         util = dForceBorrows.mul(scaleFactor).div(supply);
@@ -188,11 +188,11 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 
     const blockPerYear = BigNumber.from(2425846);
     const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
-
+    let dForceTotalUnderlying = deposit.mul(dForceExchangeRate).add(dForceUnderlying);
     return dForceBorrowAPR
         .mul(scaleFactor.sub(dForceReserveFactorMantissa))
         .mul(dForceBorrows)
-        .div(dForceUnderlying)
+        .div(dForceTotalUnderlying)
         .mul(secsInYear)
         .div(13);
 };
