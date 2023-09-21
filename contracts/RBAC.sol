@@ -8,6 +8,7 @@ contract RBAC is AccessControl {
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(WHITELISTER_ROLE, msg.sender);
     }
 
     bytes32 public constant REBALANCE_PROVIDER_ROLE =

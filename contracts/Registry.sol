@@ -48,10 +48,10 @@ contract Registry is RBAC {
         for (uint i = 0; i < _iTokens.length; i++) {
             addIToken(_iTokens[i]);
         }
-        grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
+        _grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
 
         for (uint256 i = 0; i < _whitelist.length; i++) {
-            grantRole(WHITELISTED_ROLE, _whitelist[i]);
+            _grantRole(WHITELISTED_ROLE, _whitelist[i]);
         }
         setPoolLimit(_poolLimit);
         setUserDepositiLimit(_poolLimit / 50);
