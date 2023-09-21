@@ -188,7 +188,7 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 
     const blockPerYear = BigNumber.from(2425846);
     const dForceBorrowAPR = annualBorrowRateScaled.div(blockPerYear); //await DForceModel.getBorrowRate(dForceTotalCash, dForceBorrows, dForceReserves);
-    let dForceTotalUnderlying = deposit.mul(dForceExchangeRate).add(dForceUnderlying);
+    let dForceTotalUnderlying = deposit.add(dForceUnderlying);
     return dForceBorrowAPR
         .mul(scaleFactor.sub(dForceReserveFactorMantissa))
         .mul(dForceBorrows)
