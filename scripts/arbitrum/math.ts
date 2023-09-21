@@ -17,7 +17,7 @@ import {
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 let signer: SignerWithAddress;
 
-let totalTokens = ethers.utils.parseUnits("1000", 6);
+let totalTokens = ethers.utils.parseUnits("1000000", 6);
 
 const secsInYear = 60 * 60 * 24 * 365;
 const scaleFactor = ethers.utils.parseUnits("1", 18);
@@ -161,11 +161,11 @@ export const initialize = async () => {
 };
 
 export const getDForceAPR = async (deposit: BigNumber) => {
-    dForceCash = dForceCash.add(deposit);
+    let dForceTotalCash = dForceCash.add(deposit);
 
     //getting utilization
     let util: BigNumber;
-    let grossSupply = dForceCash.add(dForceBorrows);
+    let grossSupply = dForceTotalCash.add(dForceBorrows);
     let supply = grossSupply.sub(dForceReserves);
     if (dForceBorrows.eq(BigNumber.from(0))) {
         util = BigNumber.from(0);
@@ -198,7 +198,7 @@ export const getDForceAPR = async (deposit: BigNumber) => {
 };
 
 export const getLodestarAPR = async (deposit: BigNumber) => {
-    lodestarCash = lodestarCash.add(deposit);
+    let lodestarTotalCash = lodestarCash.add(deposit);
     let oneMinusReserveFactor = scaleFactor.sub(lodestarReserveFactorMantissa);
 
     //borrow
@@ -206,7 +206,7 @@ export const getLodestarAPR = async (deposit: BigNumber) => {
     if (lodestarBorrows.eq(BigNumber.from(0))) {
         util = BigNumber.from(0);
     } else {
-        util = lodestarBorrows.mul(scaleFactor).div(lodestarCash.add(lodestarBorrows).sub(lodestarReserves));
+        util = lodestarBorrows.mul(scaleFactor).div(lodestarTotalCash.add(lodestarBorrows).sub(lodestarReserves));
     }
     const kink = ethers.utils.parseUnits("8", 17);
     const multiplierPerBlock = BigNumber.from(47564687975);
@@ -228,7 +228,7 @@ export const getLodestarAPR = async (deposit: BigNumber) => {
 };
 
 export const getTenderAPR = async (deposit: BigNumber) => {
-    tenderCash = tenderCash.add(deposit);
+    let tenderTotalCash = tenderCash.add(deposit);
     let oneMinusReserveFactor = scaleFactor.sub(tenderReserveFactorMantissa);
 
     //borrow
@@ -236,12 +236,12 @@ export const getTenderAPR = async (deposit: BigNumber) => {
     if (tenderBorrows.eq(BigNumber.from(0))) {
         util = BigNumber.from(0);
     } else {
-        util = tenderBorrows.mul(scaleFactor).div(tenderCash.add(tenderBorrows).sub(tenderReserves));
+        util = tenderBorrows.mul(scaleFactor).div(tenderTotalCash.add(tenderBorrows).sub(tenderReserves));
     }
-    const kink = ethers.utils.parseUnits("8", 17);
-    const multiplierPerBlock = BigNumber.from(23782343987);
-    let jumpMultiplierPerBlock = BigNumber.from(1783675799086);
-    let baseRatePerBlock = BigNumber.from(0);
+    const kink = ethers.utils.parseUnits("95", 16);
+    const multiplierPerBlock = BigNumber.from(0);
+    let jumpMultiplierPerBlock = BigNumber.from(443482187369);
+    let baseRatePerBlock = BigNumber.from(22174109368);
     let borrowRate: BigNumber;
     if (util.lte(kink)) {
         borrowRate = util.mul(multiplierPerBlock).div(scaleFactor).add(baseRatePerBlock);
@@ -252,13 +252,13 @@ export const getTenderAPR = async (deposit: BigNumber) => {
     }
 
     let rateToPool = borrowRate.mul(oneMinusReserveFactor).div(scaleFactor);
-    let blocksPerYear = BigNumber.from(2102400);
+    let blocksPerYear = BigNumber.from(2628000);
 
     return util.mul(rateToPool).mul(blocksPerYear).div(scaleFactor);
 };
 
 export const getWePiggyAPR = async (deposit: BigNumber) => {
-    wePiggyCash = wePiggyCash.add(deposit);
+    let wePiggyTotalCash = wePiggyCash.add(deposit);
     let oneMinusReserveFactor = scaleFactor.sub(wePiggyReserveFactorMantissa);
 
     //borrow
@@ -266,7 +266,7 @@ export const getWePiggyAPR = async (deposit: BigNumber) => {
     if (wePiggyBorrows.eq(BigNumber.from(0))) {
         util = BigNumber.from(0);
     } else {
-        util = wePiggyBorrows.mul(scaleFactor).div(wePiggyCash.add(wePiggyBorrows).sub(wePiggyReserves));
+        util = wePiggyBorrows.mul(scaleFactor).div(wePiggyTotalCash.add(wePiggyBorrows).sub(wePiggyReserves));
     }
     const kink = ethers.utils.parseUnits("8", 17);
     const multiplierPerBlock = BigNumber.from(23782343987);
@@ -274,7 +274,6 @@ export const getWePiggyAPR = async (deposit: BigNumber) => {
     let baseRatePerBlock = BigNumber.from(0);
     let borrowRate: BigNumber;
     if (util.lte(kink)) {
-        console.log("here");
         borrowRate = util.mul(multiplierPerBlock).div(scaleFactor).add(baseRatePerBlock);
     } else {
         let normalRate = kink.mul(multiplierPerBlock).div(scaleFactor).add(baseRatePerBlock);
@@ -285,7 +284,6 @@ export const getWePiggyAPR = async (deposit: BigNumber) => {
     let rateToPool = borrowRate.mul(oneMinusReserveFactor).div(scaleFactor);
     let blocksPerYear = BigNumber.from(2102400);
 
-    console.log(borrowRate.mul(blocksPerYear));
     return util.mul(rateToPool).mul(blocksPerYear).div(scaleFactor);
 };
 
@@ -353,7 +351,7 @@ async function main() {
 
     await initialize();
     //console.log(await getRequiredDeposit(getTenderAPR, ethers.utils.parseUnits("76322580819708939", 0)));
-    console.log(await bigNumberishToNumberWithDecimals(await getTenderAPR(ethers.utils.parseUnits("1000", 6)), 18)); //76322580819708939 7629394531
+    //console.log(await bigNumberishToNumberWithDecimals(await getTenderAPR(ethers.utils.parseUnits("1000", 6)), 18)); //76322580819708939 7629394531
 
     let rates: BigNumber[] = [];
     rates.push(await getCompoundAPR(BigNumber.from(0)));
@@ -368,7 +366,7 @@ async function main() {
     console.log(await bigNumberishToNumberWithDecimals(rates[2], 18));
     console.log(await bigNumberishToNumberWithDecimals(rates[3], 18));
     console.log(await bigNumberishToNumberWithDecimals(rates[4], 18));
-    return 0;
+
     let l = BigNumber.from(0);
     let r = rates[getMostProfitableProtocol(rates)];
 
@@ -377,7 +375,7 @@ async function main() {
     while (r.gt(l)) {
         requiredDeposits = [];
         let rate = l.add(r).div(2);
-        console.log("trying to make this percent: ", (await bigNumberishToNumberWithDecimals(rate, 18)) * 100);
+        //console.log("trying to make this percent: ", (await bigNumberishToNumberWithDecimals(rate, 18)) * 100);
         requiredDeposits.push(await getRequiredDeposit(getCompoundAPR, rate));
         requiredDeposits.push(await getRequiredDeposit(getWePiggyAPR, rate));
         requiredDeposits.push(await getRequiredDeposit(getTenderAPR, rate));
@@ -387,11 +385,9 @@ async function main() {
         //console.log(requiredDeposits);
         let sum: BigNumber = BigNumber.from(0);
         for (let i = 0; i < requiredDeposits.length; i++) {
-            if (requiredDeposits[i].gt(BigNumber.from(0))) {
-                sum = sum.add(requiredDeposits[i]);
-            }
+            sum = sum.add(requiredDeposits[i]);
         }
-        console.log("sum", sum);
+        //console.log("sum", sum);
         if (sum.gt(totalTokens)) {
             l = rate.add(1);
         } else {
