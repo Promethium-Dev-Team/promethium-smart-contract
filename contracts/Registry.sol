@@ -20,6 +20,8 @@ contract Registry is RBAC {
 
     IPriceRouter public immutable router;
 
+    uint256 public poolLimitSize;
+    uint256 public userDepositLimit;
     mapping(address => bool) public isAdaptorSetup;
 
     event PositionAdded(address position, address admin);
@@ -27,13 +29,16 @@ contract Registry is RBAC {
     event PositionRemoved(address position, address admin);
     event ITokenRemoved(address position, address admin);
     event Whitelisted(address user, address admin);
+    event SetPoolLimit(uint256 newLimit);
+    event SetUserDepositiLimit(uint256 newLimit);
 
     constructor(
         address[] memory _positions,
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _priceRouter,
-        address[] memory _whitelist
+        address[] memory _whitelist,
+        uint256 _poolLimit
     ) {
         router = IPriceRouter(_priceRouter);
 
@@ -48,6 +53,8 @@ contract Registry is RBAC {
         for (uint256 i = 0; i < _whitelist.length; i++) {
             grantRole(WHITELISTED_ROLE, _whitelist[i]);
         }
+        setPoolLimit(_poolLimit);
+        setUserDepositiLimit(_poolLimit / 50);
     }
 
     /**
@@ -125,8 +132,27 @@ contract Registry is RBAC {
         depositsPaused = _depositsPaused;
     }
 
+    function disableWhitelist() public onlyOwner {
+        require(!whitelistDisabled, "Already disabled");
+        whitelistDisabled = true;
+    }
+
     modifier whenNotDepositsPause() {
         require(!depositsPaused, "Deposits on pause");
         _;
+    }
+
+    function setPoolLimit(uint256 newLimit) public onlyOwner {
+        require(newLimit > poolLimitSize, "New limit should be greater");
+        poolLimitSize = newLimit;
+
+        emit SetPoolLimit(newLimit);
+    }
+
+    function setUserDepositiLimit(uint256 newLimit) public onlyOwner {
+        require(newLimit > userDepositLimit, "New limit should be greater");
+        userDepositLimit = newLimit;
+
+        emit SetUserDepositiLimit(newLimit);
     }
 }

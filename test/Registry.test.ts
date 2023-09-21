@@ -38,6 +38,7 @@ describe("Registry contract", async () => {
 
     let positionsAmountLimit: number;
     let iTokensAmountLimit: number;
+    let poolLimit: number;
 
     before(async () => {
         [owner, alice, bob, charlie, rosa, rebalanceMatrixProvider] = await ethers.getSigners();
@@ -61,6 +62,7 @@ describe("Registry contract", async () => {
 
         positionsAmountLimit = 12;
         iTokensAmountLimit = 12;
+        poolLimit = 1e6;
     });
 
     beforeEach(async () => {
@@ -72,6 +74,7 @@ describe("Registry contract", async () => {
             rebalanceMatrixProvider.address,
             priceRouter.address,
             whitelist,
+            poolLimit,
         );
     });
 
@@ -125,9 +128,7 @@ describe("Registry contract", async () => {
         });
 
         it("Should revert if the adaptor is already added", async () => {
-            await expect(Registry.connect(owner).addPosition(USDT.address)).to.be.revertedWith(
-                allreadyAddedPositionRevertString,
-            );
+            await expect(Registry.connect(owner).addPosition(USDT.address)).to.be.revertedWith(allreadyAddedPositionRevertString);
         });
 
         it("Should add a non itoken position", async () => {
@@ -149,9 +150,7 @@ describe("Registry contract", async () => {
                 await Registry.addPosition(randomWallet.address);
             }
             let randomWallet = ethers.Wallet.createRandom();
-            await expect(Registry.addPosition(randomWallet.address)).to.be.revertedWith(
-                "Positions limit amount exceeded",
-            );
+            await expect(Registry.addPosition(randomWallet.address)).to.be.revertedWith("Positions limit amount exceeded");
         });
     });
 
@@ -162,9 +161,7 @@ describe("Registry contract", async () => {
         });
 
         it("Should revert if not the owner is trying to remove position", async () => {
-            await expect(Registry.connect(charlie).removePosition(ethers.constants.Zero)).to.be.revertedWith(
-                notOwnerRevertString,
-            );
+            await expect(Registry.connect(charlie).removePosition(ethers.constants.Zero)).to.be.revertedWith(notOwnerRevertString);
         });
 
         it("Adaptor should become not allowed after removing a positions", async () => {
@@ -194,9 +191,7 @@ describe("Registry contract", async () => {
         });
 
         it("Should revert if the adaptor is already added", async () => {
-            await expect(Registry.connect(owner).addIToken(Aave.address)).to.be.revertedWith(
-                allreadyAddedPositionRevertString,
-            );
+            await expect(Registry.connect(owner).addIToken(Aave.address)).to.be.revertedWith(allreadyAddedPositionRevertString);
         });
 
         it("Should add an iToken", async () => {

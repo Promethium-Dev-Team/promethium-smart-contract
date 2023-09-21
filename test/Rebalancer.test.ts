@@ -75,7 +75,7 @@ describe("Rebalancer contract", async () => {
 
         positionsAmountLimit = 12;
         iTokensAmountLimit = 12;
-        poolSizeLimit = ethers.utils.parseUnits("1000", 18); //1000 tokens
+        poolSizeLimit = ethers.utils.parseUnits("50000", 18); //50000 tokens
 
         performanceFee = ethers.utils.parseUnits("1", 17);
         withdrawalFee = ethers.utils.parseUnits("1", 15);
@@ -157,9 +157,7 @@ describe("Rebalancer contract", async () => {
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
             await USDT.connect(bob).transfer(Rebalancer.address, bobDepositValue);
 
-            let expectedFee = bobDepositValue
-                .mul(performanceFee)
-                .div(ethers.utils.parseUnits("1", await Rebalancer.feeDecimals()));
+            let expectedFee = bobDepositValue.mul(performanceFee).div(ethers.utils.parseUnits("1", await Rebalancer.feeDecimals()));
 
             expect(await Rebalancer.getAvailableFee()).to.equal(expectedFee);
         });
@@ -189,9 +187,7 @@ describe("Rebalancer contract", async () => {
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
             await USDT.connect(bob).transfer(Rebalancer.address, bobDepositValue);
 
-            let expectedFee = bobDepositValue
-                .mul(performanceFee)
-                .div(ethers.utils.parseUnits("1", await Rebalancer.feeDecimals()));
+            let expectedFee = bobDepositValue.mul(performanceFee).div(ethers.utils.parseUnits("1", await Rebalancer.feeDecimals()));
 
             expect(await Rebalancer.totalAssets()).to.equal(bobDepositValue.add(bobDepositValue).sub(expectedFee));
         });
@@ -208,28 +204,21 @@ describe("Rebalancer contract", async () => {
             transaction = Aave.interface.encodeFunctionData("deposit", [bobDepositValue.div(2)]);
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
 
-            await expect(Rebalancer.connect(bob).rebalance(rebalanceTransactions)).to.be.revertedWith(
-                "Caller is not a rabalance provider",
-            );
+            await expect(Rebalancer.connect(bob).rebalance(rebalanceTransactions)).to.be.revertedWith("Caller is not a rabalance provider");
         });
 
         it("Should revert when balance became too low after rebalance", async () => {
             await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
 
-            let maxPossibleBalanceDrop = bobDepositValue
-                .mul(await Rebalancer.REBALANCE_THRESHOLD())
-                .div(ethers.utils.parseUnits("1", 18));
+            let maxPossibleBalanceDrop = bobDepositValue.mul(await Rebalancer.REBALANCE_THRESHOLD()).div(ethers.utils.parseUnits("1", 18));
 
             let rebalanceTransactions = [];
-            let transaction = USDT.interface.encodeFunctionData("transfer", [
-                owner.address,
-                maxPossibleBalanceDrop.add(1),
-            ]);
+            let transaction = USDT.interface.encodeFunctionData("transfer", [owner.address, maxPossibleBalanceDrop.add(1)]);
             rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
-            await expect(
-                Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions),
-            ).to.be.revertedWith("Asset balance become too low");
+            await expect(Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions)).to.be.revertedWith(
+                "Asset balance become too low",
+            );
         });
 
         it("Should emit after rebalance", async () => {
@@ -253,9 +242,7 @@ describe("Rebalancer contract", async () => {
             await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
             let bobShares = await Rebalancer.balanceOf(bob.address);
-            await expect(Rebalancer.connect(bob).requestWithdraw(bobShares.add(1))).to.be.revertedWith(
-                "ERC4626: withdraw more than max",
-            );
+            await expect(Rebalancer.connect(bob).requestWithdraw(bobShares.add(1))).to.be.revertedWith("ERC4626: withdraw more than max");
         });
 
         it("Should revert when the balance of pool is enough for instant withdraw", async () => {
@@ -293,9 +280,7 @@ describe("Rebalancer contract", async () => {
                 await Rebalancer.connect(bob).requestWithdraw(ethers.constants.One);
             }
 
-            await expect(Rebalancer.connect(bob).requestWithdraw(ethers.constants.One)).to.be.revertedWith(
-                "Withdraw queue limit exceeded",
-            );
+            await expect(Rebalancer.connect(bob).requestWithdraw(ethers.constants.One)).to.be.revertedWith("Withdraw queue limit exceeded");
         });
 
         it("Should lock shares after withdraw", async () => {
@@ -552,17 +537,13 @@ describe("Rebalancer contract", async () => {
         it("Should emit after claiming a fee", async () => {
             await USDT.connect(bob).transfer(Rebalancer.address, bobDepositValue);
             let fee = await Rebalancer.getAvailableFee();
-            await expect(Rebalancer.connect(owner).claimFee())
-                .to.emit(Rebalancer, "FeesCharged")
-                .withArgs(owner.address, fee);
+            await expect(Rebalancer.connect(owner).claimFee()).to.emit(Rebalancer, "FeesCharged").withArgs(owner.address, fee);
         });
     });
 
     describe("Deposit overriding", async () => {
         it("Should not allow to add itoken if the router does not support it", async () => {
-            await expect(Rebalancer.connect(owner).addIToken(ethers.constants.AddressZero)).to.be.revertedWith(
-                "Not supported token",
-            );
+            await expect(Rebalancer.connect(owner).addIToken(ethers.constants.AddressZero)).to.be.revertedWith("Not supported token");
         });
         it("Should revert when not whitelist person is trying to deposit", async () => {
             await expect(Rebalancer.connect(charlie).deposit(ethers.constants.One, charlie.address)).to.be.revertedWith(

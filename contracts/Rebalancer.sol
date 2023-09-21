@@ -11,7 +11,6 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     event FeesCharged(address treasury, uint256 amount);
     event RequestWithdraw(address withdrawer, uint256 shares, uint256 id);
     event WithdrawRequested(uint256 indexed id, uint256 assets);
-    event SetPoolLimit(uint256 newLimit);
 
     DataTypes.feeData public FeeData;
 
@@ -24,7 +23,6 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     uint256 depositsAfterFeeClaim;
     uint256 withdrawalsAfterFeeClaim;
 
-    uint256 public poolLimitSize;
     uint64 public constant MAX_PERFORMANCE_FEE = 0.3 * 1e18;
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
     uint256 public constant REBALANCE_THRESHOLD = 0.01 * 1e18;
@@ -43,14 +41,13 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address _rebalanceMatrixProvider,
         address _router,
         address[] memory _whitelist,
-        uint256 _poolLimitSize
+        uint256 _poolLimit
     )
         ERC4626(IERC20(_asset))
         ERC20(_name, _symbol)
-        Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist)
+        Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist, _poolLimit)
     {
         setFee(DataTypes.feeData(0.1 * 1e18, 0.001 * 1e18, msg.sender));
-        setPoolLimit(_poolLimitSize);
     }
 
     /**
@@ -194,6 +191,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 shares
     ) internal virtual override whenNotDepositsPause onlyWhitelisted nonReentrant {
         require(totalAssets() + assets <= poolLimitSize, "Pool limit exceeded");
+        require(maxWithdraw(msg.sender) + assets <= userDepositLimit, "User deposit limit exceeded");
         depositsAfterFeeClaim += assets;
         super._deposit(caller, receiver, assets, shares);
     }
@@ -261,12 +259,5 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         }
         delete withdrawQueue;
         totalRequested = 0;
-    }
-
-    function setPoolLimit(uint256 newLimit) public onlyOwner {
-        require(newLimit > poolLimitSize, "New limit should be greater");
-        poolLimitSize = newLimit;
-
-        emit SetPoolLimit(newLimit);
     }
 }
