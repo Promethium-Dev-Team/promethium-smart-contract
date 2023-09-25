@@ -132,6 +132,10 @@ contract Registry is RBAC {
         depositsPaused = _depositsPaused;
     }
 
+    /**
+     * @notice  once whitelist is disabled, it can't be enabled again
+     */
+
     function disableWhitelist() public onlyOwner {
         require(!whitelistDisabled, "Already disabled");
         whitelistDisabled = true;
