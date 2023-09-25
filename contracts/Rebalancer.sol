@@ -131,6 +131,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      */
     function requestWithdraw(uint256 shares) public nonReentrant {
         require(shares <= maxRedeem(msg.sender), "ERC4626: withdraw more than max");
+        require(shares > 0, "Amount of shares should be greater than 0");
         require(shares > previewWithdraw(IERC20(asset()).balanceOf(address(this))), "Instant withdraw is available");
         require(withdrawQueue.length < WITHDRAW_QUEUE_LIMIT, "Withdraw queue limit exceeded");
 

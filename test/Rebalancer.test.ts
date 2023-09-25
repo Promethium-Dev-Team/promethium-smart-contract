@@ -1,5 +1,5 @@
 import {ethers} from "hardhat";
-import {Contract, BigNumber} from "ethers";
+import {Contract, BigNumber, constants} from "ethers";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {ERC20token__factory} from "../typechain-types";
@@ -243,6 +243,15 @@ describe("Rebalancer contract", async () => {
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
             let bobShares = await Rebalancer.balanceOf(bob.address);
             await expect(Rebalancer.connect(bob).requestWithdraw(bobShares.add(1))).to.be.revertedWith("ERC4626: withdraw more than max");
+        });
+
+        it("Should revert when user is trying to withdraw 0 shares", async () => {
+            await USDT.connect(bob).approve(Rebalancer.address, constants.Zero);
+            await Rebalancer.connect(bob).deposit(constants.Zero, bob.address);
+
+            await expect(Rebalancer.connect(bob).requestWithdraw(constants.Zero)).to.be.revertedWith(
+                "Amount of shares should be greater than 0",
+            );
         });
 
         it("Should revert when the balance of pool is enough for instant withdraw", async () => {
