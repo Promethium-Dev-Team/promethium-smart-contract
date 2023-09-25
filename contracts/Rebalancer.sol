@@ -19,9 +19,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     DataTypes.withdrawRequest[] public withdrawQueue;
     uint256 private withdrawalRequests;
 
-    uint256 lastBalance;
-    uint256 depositsAfterFeeClaim;
-    uint256 withdrawalsAfterFeeClaim;
+    uint256 private lastBalance;
+    uint256 private depositsAfterFeeClaim;
+    uint256 private withdrawalsAfterFeeClaim;
 
     uint64 public constant MAX_PERFORMANCE_FEE = 0.3 * 1e18;
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
