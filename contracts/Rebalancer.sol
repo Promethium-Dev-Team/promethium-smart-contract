@@ -25,9 +25,9 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     uint64 public constant MAX_PERFORMANCE_FEE = 0.3 * 1e18;
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
-    uint256 public constant REBALANCE_THRESHOLD = 0.01 * 1e18;
-    uint256 public constant WITHDRAW_QUEUE_LIMIT = 10;
-    uint256 public constant feeDecimals = 18;
+    uint64 public constant REBALANCE_THRESHOLD = 0.01 * 1e18;
+    uint32 public constant WITHDRAW_QUEUE_LIMIT = 10;
+    uint32 public constant feeDecimals = 18;
 
     /**
      * @dev Set the underlying asset contract. Set all starting positions. Set price router.
