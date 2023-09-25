@@ -157,7 +157,7 @@ describe("Rebalancer contract", async () => {
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
             await USDT.connect(bob).transfer(Rebalancer.address, bobDepositValue);
 
-            let expectedFee = bobDepositValue.mul(performanceFee).div(ethers.utils.parseUnits("1", await Rebalancer.feeDecimals()));
+            let expectedFee = bobDepositValue.mul(performanceFee).div(ethers.utils.parseUnits("1", await Rebalancer.FEE_DECIMALS()));
 
             expect(await Rebalancer.getAvailableFee()).to.equal(expectedFee);
         });
@@ -187,7 +187,7 @@ describe("Rebalancer contract", async () => {
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
             await USDT.connect(bob).transfer(Rebalancer.address, bobDepositValue);
 
-            let expectedFee = bobDepositValue.mul(performanceFee).div(ethers.utils.parseUnits("1", await Rebalancer.feeDecimals()));
+            let expectedFee = bobDepositValue.mul(performanceFee).div(ethers.utils.parseUnits("1", await Rebalancer.FEE_DECIMALS()));
 
             expect(await Rebalancer.totalAssets()).to.equal(bobDepositValue.add(bobDepositValue).sub(expectedFee));
         });
