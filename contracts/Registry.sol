@@ -11,8 +11,8 @@ import "./RBAC.sol";
  */
 
 contract Registry is RBAC {
-    uint256 public POSITIONS_LIMIT = 12;
-    uint256 public ITOKENS_LIMIT = 12;
+    uint256 public constant POSITIONS_LIMIT = 12;
+    uint256 public constant ITOKENS_LIMIT = 12;
     address[] public positions;
     address[] public iTokens;
 
