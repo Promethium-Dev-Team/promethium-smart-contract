@@ -47,7 +47,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         ERC20(_name, _symbol)
         Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist, _poolLimit)
     {
-        setFee(DataTypes.feeData(0.1 * 1e18, 0.001 * 1e18, msg.sender));
+        setFee(0.1 * 1e18, 0.001 * 1e18);
+        setFeeTreasury(msg.sender);
     }
 
     /**
@@ -149,14 +150,21 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @notice  the function to set the platform fees.
      * NOTE: fees cannot be above the pre-negotiated limit
      */
-    function setFee(DataTypes.feeData memory newFeeData) public onlyOwner {
-        require(newFeeData.performanceFee <= MAX_PERFORMANCE_FEE, "Performance fee limit exceeded");
-        require(newFeeData.withdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded");
+    function setFee(uint64 newPerformanceFee, uint64 newWithdrawFee) public onlyOwner {
+        require(newPerformanceFee <= MAX_PERFORMANCE_FEE, "Performance fee limit exceeded");
+        require(newWithdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded");
 
         claimFee();
-        FeeData = newFeeData;
+        FeeData.performanceFee = newPerformanceFee;
+        FeeData.withdrawFee = newWithdrawFee;
 
-        emit FeesChanged(msg.sender, newFeeData);
+        emit FeesChanged(msg.sender, FeeData);
+    }
+
+    function setFeeTreasury(address newTreasury) public onlyOwner {
+        FeeData.treasury = newTreasury;
+
+        emit FeesChanged(msg.sender, FeeData);
     }
 
     /**

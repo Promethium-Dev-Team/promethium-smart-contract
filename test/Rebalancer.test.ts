@@ -568,7 +568,9 @@ describe("Rebalancer contract", async () => {
                 withdrawFee: withdrawalFee.mul(2),
                 treasury: bob.address,
             };
-            await expect(Rebalancer.connect(bob).setFee(newFee)).to.be.revertedWith(notOwnerRevertString);
+            await expect(Rebalancer.connect(bob).setFee(newFee.performanceFee, newFee.withdrawFee)).to.be.revertedWith(
+                notOwnerRevertString,
+            );
         });
 
         it("Should revert when trying to set performance fee higher than max", async () => {
@@ -577,7 +579,9 @@ describe("Rebalancer contract", async () => {
                 withdrawFee: withdrawalFee,
                 treasury: owner.address,
             };
-            await expect(Rebalancer.connect(owner).setFee(newFee)).to.be.revertedWith("Performance fee limit exceeded");
+            await expect(Rebalancer.connect(owner).setFee(newFee.performanceFee, newFee.withdrawFee)).to.be.revertedWith(
+                "Performance fee limit exceeded",
+            );
         });
 
         it("Should revert when trying to set withdrawal fee higher than max", async () => {
@@ -586,7 +590,9 @@ describe("Rebalancer contract", async () => {
                 withdrawFee: (await Rebalancer.MAX_WITHDRAW_FEE()).add(1),
                 treasury: owner.address,
             };
-            await expect(Rebalancer.connect(owner).setFee(newFee)).to.be.revertedWith("Withdraw fee limit exceeded");
+            await expect(Rebalancer.connect(owner).setFee(newFee.performanceFee, newFee.withdrawFee)).to.be.revertedWith(
+                "Withdraw fee limit exceeded",
+            );
         });
 
         it("Should claim fee before setting the new value", async () => {
@@ -598,14 +604,14 @@ describe("Rebalancer contract", async () => {
                 withdrawFee: withdrawalFee,
                 treasury: owner.address,
             };
-            expect(await Rebalancer.connect(owner).setFee(newFee)).to.changeTokenBalances(
+            expect(await Rebalancer.connect(owner).setFee(newFee.performanceFee, newFee.withdrawFee)).to.changeTokenBalances(
                 USDT,
                 [Rebalancer.address, owner.address],
                 [fee.mul(ethers.constants.NegativeOne), fee],
             );
         });
 
-        it("Should change the fees", async () => {
+        it("Should set the fees", async () => {
             let newFee = {
                 performanceFee: performanceFee,
                 withdrawFee: withdrawalFee,
@@ -614,7 +620,51 @@ describe("Rebalancer contract", async () => {
             let rebalancerFees = await Rebalancer.FeeData();
             expect(rebalancerFees[0]).to.equal(newFee.performanceFee);
             expect(rebalancerFees[1]).to.equal(newFee.withdrawFee);
+        });
+
+        it("Should change the fee values", async () => {
+            let newFee = {
+                performanceFee: performanceFee.mul(2),
+                withdrawFee: withdrawalFee.mul(2),
+            };
+
+            await Rebalancer.connect(owner).setFee(newFee.performanceFee, newFee.withdrawFee);
+
+            let rebalancerFees = await Rebalancer.FeeData();
+
+            expect(rebalancerFees[0]).to.equal(newFee.performanceFee);
+            expect(rebalancerFees[1]).to.equal(newFee.withdrawFee);
+        });
+    });
+
+    describe("Set feeTreasury function", async () => {
+        it("Should revert when not the owner is trying to set the fee treasury", async () => {
+            let newFee = {
+                performanceFee: performanceFee.mul(2),
+                withdrawFee: withdrawalFee.mul(2),
+                treasury: bob.address,
+            };
+            await expect(Rebalancer.connect(bob).setFeeTreasury(newFee.treasury)).to.be.revertedWith(notOwnerRevertString);
+        });
+
+        it("Should set the fee treasury after deployment", async () => {
+            let newFee = {
+                performanceFee: performanceFee,
+                withdrawFee: withdrawalFee,
+                treasury: owner.address,
+            };
+
+            let rebalancerFees = await Rebalancer.FeeData();
+
             expect(rebalancerFees[2]).to.equal(newFee.treasury);
+        });
+
+        it("Should change the fee treasury", async () => {
+            await Rebalancer.connect(owner).setFeeTreasury(bob.address);
+
+            let rebalancerFees = await Rebalancer.FeeData();
+
+            expect(rebalancerFees[2]).to.equal(bob.address);
         });
     });
 
