@@ -27,7 +27,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     uint64 public constant MAX_WITHDRAW_FEE = 0.05 * 1e18;
     uint64 public constant REBALANCE_THRESHOLD = 0.01 * 1e18;
     uint32 public constant WITHDRAW_QUEUE_LIMIT = 10;
-    uint32 public constant feeDecimals = 18;
+    uint32 public constant FEE_DECIMALS = 18;
 
     /**
      * @dev Set the underlying asset contract. Set all starting positions. Set price router.
@@ -74,7 +74,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         }
         return
             ((currentBalance + withdrawalsAfterFeeClaim - lastBalance - depositsAfterFeeClaim) *
-                FeeData.performanceFee) / (10 ** feeDecimals);
+                FeeData.performanceFee) / (10 ** FEE_DECIMALS);
     }
 
     /**
@@ -216,7 +216,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         uint256 shares
     ) internal virtual override {
         withdrawalsAfterFeeClaim += assets;
-        uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** feeDecimals);
+        uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** FEE_DECIMALS);
         _payFee(withdrawFee);
         assets -= withdrawFee;
         super._withdraw(caller, receiver, owner, assets, shares);
@@ -224,7 +224,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
     function _withdrawRequested(address withdrawer, uint256 assets, uint256 shares) internal {
         withdrawalsAfterFeeClaim += assets;
-        uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** feeDecimals);
+        uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** FEE_DECIMALS);
         _payFee(withdrawFee);
 
         assets -= withdrawFee;
