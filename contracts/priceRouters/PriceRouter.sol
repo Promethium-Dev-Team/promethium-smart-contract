@@ -156,6 +156,11 @@ contract PriceRouter is Initializable, IPriceRouter, UUPSUpgradeable, OwnableUpg
     }
 
     function initialize(address _usdt, address _usdc_e, address _wbtc, address _weth, address _arb) external initializer {
+        require(_usdt != address(0), "Token can't be address 0");
+        require(_usdc_e != address(0), "Token can't be address 0");
+        require(_wbtc != address(0), "Token can't be address 0");
+        require(_weth != address(0), "Token can't be address 0");
+        require(_arb != address(0), "Token can't be address 0");
         usdt = _usdt;
         usdc_e = _usdc_e;
         wbtc = _wbtc;

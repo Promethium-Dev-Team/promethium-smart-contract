@@ -54,7 +54,7 @@ contract Registry is RBAC {
             _grantRole(WHITELISTED_ROLE, _whitelist[i]);
         }
         _setPoolLimit(_poolLimit);
-        _setUserDepositiLimit(_poolLimit / 50);
+        _setUserDepositLimit(_poolLimit / 50);
     }
 
     /**
@@ -76,6 +76,7 @@ contract Registry is RBAC {
      */
 
     function addPosition(address position) public onlyOwner {
+        require(position != address(0), "Position can't be address zero");
         require(!isAdaptorSetup[position], "Already added");
         require(positions.length < POSITIONS_LIMIT, "Positions limit amount exceeded");
 
@@ -103,6 +104,7 @@ contract Registry is RBAC {
      * @notice  allows admin to add a new iToken to store the balance in
      */
     function addIToken(address token) public virtual onlyOwner {
+        require(token != address(0), "Token can't address zero");
         require(!isAdaptorSetup[token], "Already added");
         require(iTokens.length < ITOKENS_LIMIT, "iTokens limit amount exceeded");
 
@@ -147,22 +149,22 @@ contract Registry is RBAC {
     }
 
     function setPoolLimit(uint256 newLimit) external onlyOwner {
-        require(newLimit > poolLimitSize, "New limit should be greater");
         _setPoolLimit(newLimit);
     }
 
     function setUserDepositiLimit(uint256 newLimit) external onlyOwner {
-        require(newLimit > userDepositLimit, "New limit should be greater");
-        _setUserDepositiLimit(newLimit);
+        _setUserDepositLimit(newLimit);
     }
 
     function _setPoolLimit(uint256 newLimit) private {
+        require(newLimit > poolLimitSize, "New limit should be greater");
         poolLimitSize = newLimit;
 
         emit SetPoolLimit(newLimit);
     }
 
-    function _setUserDepositiLimit(uint256 newLimit) private {
+    function _setUserDepositLimit(uint256 newLimit) private {
+        require(newLimit > userDepositLimit, "New limit should be greater");
         userDepositLimit = newLimit;
 
         emit SetUserDepositiLimit(newLimit);
