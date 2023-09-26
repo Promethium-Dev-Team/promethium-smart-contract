@@ -53,8 +53,8 @@ contract Registry is RBAC {
         for (uint256 i = 0; i < _whitelist.length; i++) {
             _grantRole(WHITELISTED_ROLE, _whitelist[i]);
         }
-        setPoolLimit(_poolLimit);
-        setUserDepositiLimit(_poolLimit / 50);
+        _setPoolLimit(_poolLimit);
+        _setUserDepositiLimit(_poolLimit / 50);
     }
 
     /**
@@ -146,15 +146,23 @@ contract Registry is RBAC {
         _;
     }
 
-    function setPoolLimit(uint256 newLimit) public onlyOwner {
+    function setPoolLimit(uint256 newLimit) external onlyOwner {
         require(newLimit > poolLimitSize, "New limit should be greater");
+        _setPoolLimit(newLimit);
+    }
+
+    function setUserDepositiLimit(uint256 newLimit) external onlyOwner {
+        require(newLimit > userDepositLimit, "New limit should be greater");
+        _setUserDepositiLimit(newLimit);
+    }
+
+    function _setPoolLimit(uint256 newLimit) private {
         poolLimitSize = newLimit;
 
         emit SetPoolLimit(newLimit);
     }
 
-    function setUserDepositiLimit(uint256 newLimit) public onlyOwner {
-        require(newLimit > userDepositLimit, "New limit should be greater");
+    function _setUserDepositiLimit(uint256 newLimit) private {
         userDepositLimit = newLimit;
 
         emit SetUserDepositiLimit(newLimit);
