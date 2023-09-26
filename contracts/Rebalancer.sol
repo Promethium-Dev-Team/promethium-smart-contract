@@ -47,7 +47,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         ERC20(_name, _symbol)
         Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist, _poolLimit)
     {
-        setFee(0.1 * 1e18, 0.001 * 1e18);
+        _setFee(0.1 * 1e18, 0.001 * 1e18);
         setFeeTreasury(msg.sender);
     }
 
@@ -130,7 +130,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @dev     shares shouldn't be burned but user can't use them in any other way
      * @param   shares  amount of shares user will redeem during next rebalance
      */
-    function requestWithdraw(uint256 shares) public nonReentrant {
+    function requestWithdraw(uint256 shares) external nonReentrant {
         require(shares <= maxRedeem(msg.sender), "ERC4626: withdraw more than max");
         require(shares > 0, "Amount of shares should be greater than 0");
         require(shares > previewWithdraw(IERC20(asset()).balanceOf(address(this))), "Instant withdraw is available");
@@ -150,10 +150,13 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @notice  the function to set the platform fees.
      * NOTE: fees cannot be above the pre-negotiated limit
      */
-    function setFee(uint64 newPerformanceFee, uint64 newWithdrawFee) public onlyOwner {
+    function setFee(uint64 newPerformanceFee, uint64 newWithdrawFee) external onlyOwner {
+        _setFee(newPerformanceFee, newWithdrawFee);
+    }
+
+    function _setFee(uint64 newPerformanceFee, uint64 newWithdrawFee) private {
         require(newPerformanceFee <= MAX_PERFORMANCE_FEE, "Performance fee limit exceeded");
         require(newWithdrawFee <= MAX_WITHDRAW_FEE, "Withdraw fee limit exceeded");
-
         claimFee();
         FeeData.performanceFee = newPerformanceFee;
         FeeData.withdrawFee = newWithdrawFee;

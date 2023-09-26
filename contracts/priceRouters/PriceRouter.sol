@@ -20,7 +20,7 @@ contract PriceRouter is Initializable, IPriceRouter, UUPSUpgradeable, OwnableUpg
     address public weth;
     address public arb;
 
-    function getTokenValue(address token, address itoken, uint256 amount) public view returns (uint256) {
+    function getTokenValue(address token, address itoken, uint256 amount) external view returns (uint256) {
         if (token == usdt) {
             //radiant V2
             if (itoken == address(0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9)) {
@@ -155,7 +155,7 @@ contract PriceRouter is Initializable, IPriceRouter, UUPSUpgradeable, OwnableUpg
         revert("Not supported token");
     }
 
-    function initialize(address _usdt, address _usdc_e, address _wbtc, address _weth, address _arb) public initializer {
+    function initialize(address _usdt, address _usdc_e, address _wbtc, address _weth, address _arb) external initializer {
         usdt = _usdt;
         usdc_e = _usdc_e;
         wbtc = _wbtc;

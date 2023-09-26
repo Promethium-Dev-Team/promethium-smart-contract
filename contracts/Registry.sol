@@ -136,7 +136,7 @@ contract Registry is RBAC {
      * @notice  once whitelist is disabled, it can't be enabled again
      */
 
-    function disableWhitelist() public onlyOwner {
+    function disableWhitelist() external onlyOwner {
         require(!whitelistDisabled, "Already disabled");
         whitelistDisabled = true;
     }
