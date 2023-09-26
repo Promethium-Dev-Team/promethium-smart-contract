@@ -225,7 +225,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         super._withdraw(caller, receiver, owner, assets, shares);
     }
 
-    function _withdrawRequested(address withdrawer, uint256 assets, uint256 shares) internal {
+    function _withdrawRequested(address withdrawer, uint256 assets, uint256 shares, uint256 id) internal {
         withdrawalsAfterFeeClaim += assets;
         uint256 withdrawFee = (assets * FeeData.withdrawFee) / (10 ** FEE_DECIMALS);
         _payFee(withdrawFee);
@@ -233,6 +233,8 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         assets -= withdrawFee;
         _burn(withdrawer, shares);
         SafeERC20.safeTransfer(IERC20(asset()), withdrawer, assets);
+
+        emit WithdrawRequested(id, assets);
     }
 
     /**
@@ -265,9 +267,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         for (uint256 i = 0; i < withdrawQueue.length; i++) {
             lockedShares[withdrawQueue[i].receiver] -= withdrawQueue[i].shares;
             uint256 assets = convertToAssets(withdrawQueue[i].shares);
-            _withdrawRequested(withdrawQueue[i].receiver, assets, withdrawQueue[i].shares);
-
-            emit WithdrawRequested(withdrawQueue[i].id, assets);
+            _withdrawRequested(withdrawQueue[i].receiver, assets, withdrawQueue[i].shares, withdrawQueue[i].id);
         }
         delete withdrawQueue;
         totalRequested = 0;
