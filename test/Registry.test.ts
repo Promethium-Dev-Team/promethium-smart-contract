@@ -247,7 +247,7 @@ describe("Registry contract", async () => {
         });
     });
 
-    describe("Deposites pause function", async () => {
+    describe("Deposits pause function", async () => {
         it("Should revert if not the owner is trying to pause", async () => {
             await expect(Registry.connect(bob).setPause(true)).to.be.revertedWith(notOwnerRevertString);
         });
@@ -263,6 +263,10 @@ describe("Registry contract", async () => {
             await Registry.connect(owner).setPause(false);
 
             expect(await Registry.depositsPaused()).to.equal(false);
+        });
+
+        it("Should emit after changing the status", async () => {
+            await expect(Registry.connect(owner).setPause(true)).to.emit(Registry, "SetPause").withArgs(true);
         });
     });
 });
