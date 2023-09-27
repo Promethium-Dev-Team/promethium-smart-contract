@@ -41,6 +41,8 @@ contract Registry is RBAC {
         address[] memory _whitelist,
         uint256 _poolLimit
     ) {
+        require(_rebalanceMatrixProvider != address(0), "Rebalance provider address can't be address zero");
+        require(_priceRouter != address(0), "Price router address can't be address zero");
         router = IPriceRouter(_priceRouter);
 
         for (uint i = 0; i < _positions.length; i++) {
