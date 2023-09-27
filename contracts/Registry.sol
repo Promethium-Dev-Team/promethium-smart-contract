@@ -31,6 +31,7 @@ contract Registry is RBAC {
     event Whitelisted(address user, address admin);
     event SetPoolLimit(uint256 newLimit);
     event SetUserDepositiLimit(uint256 newLimit);
+    event SetPause(bool depositsPaused);
 
     constructor(
         address[] memory _positions,
@@ -132,6 +133,7 @@ contract Registry is RBAC {
 
     function setPause(bool _depositsPaused) public onlyOwner {
         depositsPaused = _depositsPaused;
+        emit SetPause(depositsPaused);
     }
 
     /**

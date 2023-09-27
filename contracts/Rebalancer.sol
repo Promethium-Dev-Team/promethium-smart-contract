@@ -48,7 +48,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist, _poolLimit)
     {
         _setFee(0.1 * 1e18, 0.001 * 1e18);
-        setFeeTreasury(msg.sender);
+        _setFeeTreasury(msg.sender);
     }
 
     /**
@@ -165,6 +165,10 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     }
 
     function setFeeTreasury(address newTreasury) public onlyOwner {
+        _setFeeTreasury(newTreasury);
+    }
+
+    function _setFeeTreasury(address newTreasury) private {
         FeeData.treasury = newTreasury;
 
         emit FeesChanged(msg.sender, FeeData);
