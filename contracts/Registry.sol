@@ -133,7 +133,7 @@ contract Registry is RBAC {
         emit ITokenRemoved(positionAddress, msg.sender);
     }
 
-    function setPause(bool _depositsPaused) public onlyOwner {
+    function setPause(bool _depositsPaused) external onlyOwner {
         depositsPaused = _depositsPaused;
         emit SetPause(depositsPaused);
     }
