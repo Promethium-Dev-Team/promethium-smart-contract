@@ -161,14 +161,12 @@ contract Registry is RBAC {
     }
 
     function _setPoolLimit(uint256 newLimit) private {
-        require(newLimit > poolLimitSize, "New limit should be greater");
         poolLimitSize = newLimit;
 
         emit SetPoolLimit(newLimit);
     }
 
     function _setUserDepositLimit(uint256 newLimit) private {
-        require(newLimit > userDepositLimit, "New limit should be greater");
         userDepositLimit = newLimit;
 
         emit SetUserDepositiLimit(newLimit);
