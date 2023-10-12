@@ -24,4 +24,9 @@ library DataTypes {
         uint256 shares;
         uint256 id;
     }
+
+    struct ProtocolSelectors {
+        bytes4 deposit;
+        bytes4 withdraw;
+    }
 }

@@ -1,24 +1,30 @@
 import {ethers} from "hardhat";
-import {Contract, BigNumber, constants} from "ethers";
+import {BigNumber, constants} from "ethers";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {ERC20token__factory} from "../typechain-types";
+import {
+    ERC20token,
+    ERC20token__factory,
+    InterestBearning,
+    PriceRouterMock,
+    Rebalancer
+} from "../typechain-types";
 import {InterestBearning__factory} from "../typechain-types";
 import {PriceRouterMock__factory} from "../typechain-types";
 import {Rebalancer__factory} from "../typechain-types";
 
 describe("Rebalancer contract", async () => {
-    let Rebalancer: Contract;
+    let Rebalancer: Rebalancer;
 
-    let USDT: Contract;
-    let USDC: Contract;
-    let Aave: Contract;
-    let Tender: Contract;
-    let Dolomite: Contract;
-    let Impermax: Contract;
-    let WePiggy: Contract;
+    let USDT: ERC20token;
+    let USDC: ERC20token;
+    let Aave: InterestBearning;
+    let Tender: InterestBearning;
+    let Dolomite: InterestBearning;
+    let Impermax: InterestBearning;
+    let WePiggy: InterestBearning;
 
-    let priceRouter: Contract;
+    let priceRouter: PriceRouterMock;
 
     let alice: SignerWithAddress;
     let bob: SignerWithAddress;
@@ -33,11 +39,12 @@ describe("Rebalancer contract", async () => {
     let notOwnerRevertString: string;
     let allreadyAddedPositionRevertString: string;
 
-    let positions: string[] = [];
+    let protocols: string[] = [];
+    let PROTOCOL_SELECTOR: {deposit: string; withdraw: string;};
+    let protocolSelectors: {deposit: string; withdraw: string;}[] = [];
     let iTokens: string[] = [];
-    let whitelist: string[] = [];
 
-    let positionsAmountLimit: number;
+    let protocolsAmountLimit: number;
     let iTokensAmountLimit: number;
     let poolSizeLimit: BigNumber;
 
@@ -69,11 +76,15 @@ describe("Rebalancer contract", async () => {
         notOwnerRevertString = "Caller is not the owner";
         allreadyAddedPositionRevertString = "Already added";
 
-        positions = [USDT.address];
+        protocols = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
+        PROTOCOL_SELECTOR = {
+            deposit: Aave.interface.getSighash('deposit'),
+            withdraw: Aave.interface.getSighash('withdraw')
+        }
+        protocolSelectors = protocols.map(() => PROTOCOL_SELECTOR);
         iTokens = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
-        whitelist = [alice.address, bob.address];
 
-        positionsAmountLimit = 12;
+        protocolsAmountLimit = 12;
         iTokensAmountLimit = 12;
         poolSizeLimit = ethers.utils.parseUnits("50000", 18); //50000 tokens
 
@@ -89,11 +100,11 @@ describe("Rebalancer contract", async () => {
             USDT.address,
             "Promethium USDT",
             "USDT Share",
-            positions,
+            protocols,
+            protocolSelectors,
             iTokens,
             rebalanceMatrixProvider.address,
             priceRouter.address,
-            whitelist,
             poolSizeLimit,
         );
     });
@@ -168,17 +179,6 @@ describe("Rebalancer contract", async () => {
 
             expect(await Rebalancer.getAvailableFee()).to.equal(ethers.constants.Zero);
         });
-
-        it("Performance fee should be equal to 0 when pool balance become lower", async () => {
-            await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
-            await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
-
-            let rebalanceTransactions = [];
-            let transaction = USDT.interface.encodeFunctionData("transfer", [owner.address, 1]);
-            rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
-            await Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions);
-            expect(await Rebalancer.getAvailableFee()).to.equal(ethers.constants.Zero);
-        });
     });
 
     describe("Total assets without fee function", async () => {
@@ -194,6 +194,16 @@ describe("Rebalancer contract", async () => {
     });
 
     describe("Rebalance function", async () => {
+        it("Should revert - Illegal execute", async () => {
+            await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
+            await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
+
+            let rebalanceTransactions = [];
+            let transaction = USDT.interface.encodeFunctionData("transfer", [owner.address, 1]);
+            rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
+            await expect(Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions)).revertedWith("Illegal execute");
+        });
+
         it("Should revert when to the rebalance provider is trying to execute", async () => {
             await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
             await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
@@ -205,20 +215,6 @@ describe("Rebalancer contract", async () => {
             rebalanceTransactions.push({adaptor: Aave.address, callData: transaction});
 
             await expect(Rebalancer.connect(bob).rebalance(rebalanceTransactions)).to.be.revertedWith("Caller is not a rabalance provider");
-        });
-
-        it("Should revert when balance became too low after rebalance", async () => {
-            await USDT.connect(bob).approve(Rebalancer.address, bobDepositValue);
-            await Rebalancer.connect(bob).deposit(bobDepositValue, bob.address);
-
-            let maxPossibleBalanceDrop = bobDepositValue.mul(await Rebalancer.REBALANCE_THRESHOLD()).div(ethers.utils.parseUnits("1", 18));
-
-            let rebalanceTransactions = [];
-            let transaction = USDT.interface.encodeFunctionData("transfer", [owner.address, maxPossibleBalanceDrop.add(1)]);
-            rebalanceTransactions.push({adaptor: USDT.address, callData: transaction});
-            await expect(Rebalancer.connect(rebalanceMatrixProvider).rebalance(rebalanceTransactions)).to.be.revertedWith(
-                "Asset balance become too low",
-            );
         });
 
         it("Should emit after rebalance", async () => {
@@ -554,11 +550,7 @@ describe("Rebalancer contract", async () => {
         it("Should not allow to add itoken if the router does not support it", async () => {
             await expect(Rebalancer.connect(owner).addIToken(ethers.constants.AddressZero)).to.be.revertedWith("Not supported token");
         });
-        it("Should revert when not whitelist person is trying to deposit", async () => {
-            await expect(Rebalancer.connect(charlie).deposit(ethers.constants.One, charlie.address)).to.be.revertedWith(
-                "Caller is not whitelisted",
-            );
-        });
+
     });
 
     describe("Set fee function", async () => {

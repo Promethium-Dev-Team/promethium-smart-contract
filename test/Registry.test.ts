@@ -1,24 +1,27 @@
 import {ethers} from "hardhat";
-import {Contract} from "ethers";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {Registry__factory} from "../typechain-types";
+import {ERC20token, InterestBearning, PriceRouterMock, Registry, Registry__factory} from "../typechain-types";
 import {ERC20token__factory} from "../typechain-types";
 import {InterestBearning__factory} from "../typechain-types";
 import {PriceRouterMock__factory} from "../typechain-types";
 
+const sortFn = (a: string, b: string) => {
+    return a.concat(b) < b.concat(a) ? 1 : a.concat(b) > b.concat(a) ? -1 : 0;
+};
+
 describe("Registry contract", async () => {
-    let Registry: Contract;
+    let Registry: Registry;
 
-    let USDT: Contract;
-    let USDC: Contract;
-    let Aave: Contract;
-    let Tender: Contract;
-    let Dolomite: Contract;
-    let Impermax: Contract;
-    let WePiggy: Contract;
+    let USDT: ERC20token;
+    let USDC: ERC20token;
+    let Aave: InterestBearning;
+    let Tender: InterestBearning;
+    let Dolomite: InterestBearning;
+    let Impermax: InterestBearning;
+    let WePiggy: InterestBearning;
 
-    let priceRouter: Contract;
+    let priceRouter: PriceRouterMock;
 
     let alice: SignerWithAddress;
     let bob: SignerWithAddress;
@@ -30,13 +33,14 @@ describe("Registry contract", async () => {
     let REBALANCE_PROVIDER_ROLE: string;
 
     let notOwnerRevertString: string;
-    let allreadyAddedPositionRevertString: string;
+    let allreadyAddedProtocolRevertString: string;
 
-    let positions: string[] = [];
+    let protocols: string[] = [];
+    let PROTOCOL_SELECTORS: {withdraw: string; deposit: string};
+    let protocolSelectors: {withdraw: string; deposit: string}[] = [];
     let iTokens: string[] = [];
-    let whitelist: string[] = [];
 
-    let positionsAmountLimit: number;
+    let protocolsAmountLimit: number;
     let iTokensAmountLimit: number;
     let poolLimit: number;
 
@@ -54,13 +58,17 @@ describe("Registry contract", async () => {
 
         priceRouter = await new PriceRouterMock__factory(bob).deploy();
         notOwnerRevertString = "Caller is not the owner";
-        allreadyAddedPositionRevertString = "Already added";
+        allreadyAddedProtocolRevertString = "Already added";
 
-        positions = [USDT.address];
+        protocols = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
+        PROTOCOL_SELECTORS = {
+            deposit: Aave.interface.getSighash("deposit"),
+            withdraw: Aave.interface.getSighash("withdraw"),
+        };
+        protocolSelectors = protocols.map(() => PROTOCOL_SELECTORS);
         iTokens = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
-        whitelist = [alice.address, bob.address];
 
-        positionsAmountLimit = 12;
+        protocolsAmountLimit = 12;
         iTokensAmountLimit = 12;
         poolLimit = 1e6;
     });
@@ -69,25 +77,23 @@ describe("Registry contract", async () => {
         REBALANCE_PROVIDER_ROLE = "0x524542414c414e43455f50524f56494445525f524f4c45000000000000000000";
 
         Registry = await new Registry__factory(owner).deploy(
-            positions,
+            protocols,
+            protocolSelectors,
             iTokens,
             rebalanceMatrixProvider.address,
             priceRouter.address,
-            whitelist,
             poolLimit,
         );
     });
 
     describe("Deployment", async () => {
-        it("Should not set the correct amount of position", async () => {
-            expect((await Registry.getPositions()).length).to.equal(positions.length);
+        it("Should not set the correct amount of protocols", async () => {
+            expect((await Registry.getProtocols()).length).to.equal(protocols.length);
         });
 
-        it("Should not set the correct positions", async () => {
-            let registryPositions = await Registry.getPositions();
-            for (let i = 0; i < positions.length; i++) {
-                expect(registryPositions[i]).to.equal(positions[i]);
-            }
+        it("Should not set the correct protocols", async () => {
+            let registryProtocols = await Registry.getProtocols();
+            protocols.forEach((protocol, index) => expect(protocol).to.equal(registryProtocols[index]));
         });
 
         it("Should set the corect amount of iTokens", async () => {
@@ -95,10 +101,8 @@ describe("Registry contract", async () => {
         });
 
         it("Should set the corect iTokens", async () => {
-            let registryItokens = await Registry.getITokens();
-            for (let i = 0; i < iTokens.length; i++) {
-                expect(registryItokens[i]).to.equal(iTokens[i]);
-            }
+            let registryITokens = await Registry.getITokens();
+            iTokens.forEach((iToken, index) => expect(iToken).to.equal(registryITokens[index]));
         });
 
         it("Should set the correct rebalancer role after", async () => {
@@ -108,80 +112,62 @@ describe("Registry contract", async () => {
         it("Should set price router address", async () => {
             expect(await Registry.router()).to.equal(priceRouter.address);
         });
-
-        it("Should whitelist wallets", async () => {
-            for (let i = 0; i < whitelist.length; i++) {
-                expect(await Registry.hasRole(await Registry.WHITELISTED_ROLE(), whitelist[i])).to.equal(true);
-            }
-        });
-
-        it("Should not whitelist any other", async () => {
-            for (let i = 0; i < whitelist.length; i++) {
-                expect(await Registry.hasRole(await Registry.WHITELISTED_ROLE(), charlie.address)).to.equal(false);
-            }
-        });
     });
 
-    describe("Add position function", async () => {
-        it("Should revert when not the owner is trying to set a new position", async () => {
-            await expect(Registry.connect(alice).addPosition(USDC.address)).to.be.revertedWith(notOwnerRevertString);
+    describe("Add protocol function", async () => {
+        it("Should revert when not the owner is trying to set a new protocol", async () => {
+            await expect(Registry.connect(alice).addProtocol(USDC.address, PROTOCOL_SELECTORS)).to.be.revertedWith(notOwnerRevertString);
         });
 
         it("Should revert if the adaptor is already added", async () => {
-            await expect(Registry.connect(owner).addPosition(USDT.address)).to.be.revertedWith(allreadyAddedPositionRevertString);
+            await expect(Registry.connect(owner).addProtocol(Aave.address, PROTOCOL_SELECTORS)).to.be.revertedWith(
+                allreadyAddedProtocolRevertString,
+            );
         });
 
-        it("Should add a non itoken position", async () => {
-            let previousLength = (await Registry.getPositions()).length;
+        it("Should add a non iToken protocol", async () => {
+            let previousLength = (await Registry.getProtocols()).length;
 
-            await Registry.connect(owner).addPosition(USDC.address);
-            expect((await Registry.getPositions()).length).to.equal(previousLength + 1);
+            await Registry.connect(owner).addProtocol(USDC.address, PROTOCOL_SELECTORS);
+            expect((await Registry.getProtocols()).length).to.equal(previousLength + 1);
         });
 
-        it("Should emit an event after adding a position", async () => {
-            await expect(Registry.connect(owner).addPosition(USDC.address))
-                .to.emit(Registry, "PositionAdded")
-                .withArgs(USDC.address, owner.address);
-        });
-
-        it("Should not allow to add more positions than limit", async () => {
-            for (let i = 0; i < positionsAmountLimit - positions.length; i++) {
+        it("Should not allow to add more protocols than limit", async () => {
+            for (let i = 0; i < protocolsAmountLimit - protocols.length; i++) {
                 let randomWallet = ethers.Wallet.createRandom();
-                await Registry.addPosition(randomWallet.address);
+                await Registry.addProtocol(randomWallet.address, PROTOCOL_SELECTORS);
             }
             let randomWallet = ethers.Wallet.createRandom();
-            await expect(Registry.addPosition(randomWallet.address)).to.be.revertedWith("Positions limit amount exceeded");
+            await expect(Registry.addProtocol(randomWallet.address, PROTOCOL_SELECTORS)).to.be.revertedWith(
+                "Protocols limit amount exceeded",
+            );
         });
     });
 
-    describe("Remove position function", async () => {
-        it("Should remove the position from allowed adaptors list", async () => {
-            await Registry.connect(owner).removePosition(ethers.constants.Zero);
-            expect((await Registry.getPositions()).length).to.equal(positions.length - 1);
+    describe("Remove protocol function", async () => {
+        it("Should remove the protocol from allowed adaptors list", async () => {
+            await Registry.connect(owner).removeProtocol(ethers.constants.Zero);
+            expect((await Registry.getProtocols()).length).to.equal(protocols.length - 1);
         });
 
-        it("Should revert if not the owner is trying to remove position", async () => {
-            await expect(Registry.connect(charlie).removePosition(ethers.constants.Zero)).to.be.revertedWith(notOwnerRevertString);
+        it("Should revert if not the owner is trying to remove protocol", async () => {
+            await expect(Registry.connect(charlie).removeProtocol(ethers.constants.Zero)).to.be.revertedWith(notOwnerRevertString);
         });
 
-        it("Adaptor should become not allowed after removing a positions", async () => {
-            await Registry.connect(owner).removePosition(ethers.constants.Zero);
-            expect(await Registry.isAdaptorSetup(positions[0])).to.equal(false);
+        it("Adaptor should become not allowed after removing a protocols", async () => {
+            await Registry.connect(owner).removeProtocol(ethers.constants.Zero);
+            expect(await Registry.isProtocol(protocols[0])).to.equal(false);
         });
 
-        it("Should emit after removing position", async () => {
-            await expect(Registry.connect(owner).removePosition(ethers.constants.Zero))
-                .to.emit(Registry, "PositionRemoved")
-                .withArgs(positions[positions.length - 1], owner.address);
+        it("Should emit after removing protocol", async () => {
+            await expect(Registry.connect(owner).removeProtocol(ethers.constants.Zero))
+                .to.emit(Registry, "RemoveProtocol")
+                .withArgs(0, protocols[0]);
         });
 
-        it("Shouldn't remove any extra position", async () => {
-            await Registry.connect(owner).removePosition(ethers.constants.Zero);
-            let registryPositions = await Registry.getPositions();
-            for (let i = 0; i < registryPositions.length; i++) {
-                expect(registryPositions[i]).to.equal(positions[i + 1]);
-            }
-            expect(registryPositions.length).to.be.equal(positions.length - 1);
+        it("Shouldn't remove any extra protocol", async () => {
+            await Registry.connect(owner).removeProtocol(0);
+            expect(protocols.slice(1).sort(sortFn)).eql([...(await Registry.getProtocols())].sort(sortFn));
         });
     });
 
@@ -191,7 +177,7 @@ describe("Registry contract", async () => {
         });
 
         it("Should revert if the adaptor is already added", async () => {
-            await expect(Registry.connect(owner).addIToken(Aave.address)).to.be.revertedWith(allreadyAddedPositionRevertString);
+            await expect(Registry.connect(owner).addIToken(Aave.address)).to.be.revertedWith(allreadyAddedProtocolRevertString);
         });
 
         it("Should add an iToken", async () => {
@@ -199,7 +185,7 @@ describe("Registry contract", async () => {
             expect((await Registry.getITokens())[iTokens.length]).to.equal(WePiggy.address);
         });
 
-        it("Should not allow to add more positions than limit", async () => {
+        it("Should not allow to add more protocols than limit", async () => {
             for (let i = 0; i < iTokensAmountLimit - iTokens.length; i++) {
                 let randomWallet = ethers.Wallet.createRandom();
                 await Registry.addIToken(randomWallet.address);
@@ -208,65 +194,59 @@ describe("Registry contract", async () => {
             await expect(Registry.addIToken(randomWallet.address)).to.be.revertedWith("iTokens limit amount exceeded");
         });
 
-        it("Should emit an event after adding a position", async () => {
-            await expect(Registry.connect(owner).addIToken(WePiggy.address))
-                .to.emit(Registry, "ITokenAdded")
-                .withArgs(WePiggy.address, owner.address);
+        it("Should emit an event after adding a iToken", async () => {
+            await expect(Registry.connect(owner).addIToken(WePiggy.address)).to.emit(Registry, "AddIToken").withArgs(WePiggy.address);
         });
     });
 
     describe("Remove IToken function", async () => {
-        it("Should revert if not the owner is trying to remove iPosition", async () => {
+        it("Should revert if not the owner is trying to remove iToken", async () => {
             await expect(Registry.connect(bob).removeIToken(0)).to.be.revertedWith(notOwnerRevertString);
         });
 
-        it("Should revert if the owner is trying to remove position with non zero balancer", async () => {
+        it("Should revert if the owner is trying to remove iToken with non zero balancer", async () => {
             await Aave.connect(bob).transfer(Registry.address, ethers.constants.One);
 
-            await expect(Registry.connect(owner).removeIToken(0)).to.be.revertedWith("Itoken balance should be 0");
+            await expect(Registry.connect(owner).removeIToken(0)).to.be.revertedWith("IToken balance should be 0");
         });
 
-        it("Shouldn't remove any extra itoken", async () => {
+        it("Shouldn't remove any extra iToken", async () => {
             await Registry.connect(owner).removeIToken(0);
-            let registryIPositions = await Registry.getITokens();
-            for (let i = 0; i < registryIPositions.length; i++) {
-                expect(registryIPositions[i]).to.equal(iTokens[i + 1]);
-            }
-            expect(registryIPositions.length).to.be.equal(iTokens.length - 1);
+            expect(iTokens.slice(1).sort(sortFn)).eql([...(await Registry.getITokens())].sort(sortFn));
         });
 
-        it("Adaptor should become not allowed after removing an itoken", async () => {
+        it("Adaptor should become not allowed after removing an iToken", async () => {
             await Registry.connect(owner).removeIToken(ethers.constants.Zero);
-            expect(await Registry.isAdaptorSetup(iTokens[0])).to.equal(false);
+            expect(await Registry.isIToken(iTokens[0])).to.equal(false);
         });
 
         it("Should emit after removing an iToken", async () => {
             await expect(await Registry.connect(owner).removeIToken(ethers.constants.Zero))
-                .to.emit(Registry, "ITokenRemoved")
-                .withArgs(iTokens[0], owner.address);
+                .to.emit(Registry, "RemoveIToken")
+                .withArgs(0, iTokens[0]);
         });
     });
 
     describe("Deposits pause function", async () => {
         it("Should revert if not the owner is trying to pause", async () => {
-            await expect(Registry.connect(bob).setPause(true)).to.be.revertedWith(notOwnerRevertString);
+            await expect(Registry.connect(bob).setDepositsPaused(true)).to.be.revertedWith(notOwnerRevertString);
         });
 
         it("Should pause", async () => {
-            await Registry.connect(owner).setPause(true);
+            await Registry.connect(owner).setDepositsPaused(true);
 
             expect(await Registry.depositsPaused()).to.equal(true);
         });
 
         it("Should unpause", async () => {
-            await Registry.connect(owner).setPause(true);
-            await Registry.connect(owner).setPause(false);
+            await Registry.connect(owner).setDepositsPaused(true);
+            await Registry.connect(owner).setDepositsPaused(false);
 
             expect(await Registry.depositsPaused()).to.equal(false);
         });
 
         it("Should emit after changing the status", async () => {
-            await expect(Registry.connect(owner).setPause(true)).to.emit(Registry, "SetPause").withArgs(true);
+            await expect(Registry.connect(owner).setDepositsPaused(true)).to.emit(Registry, "SetDepositsPaused").withArgs(true);
         });
     });
 });

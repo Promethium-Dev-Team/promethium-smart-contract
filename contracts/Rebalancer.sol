@@ -30,22 +30,22 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     uint32 public constant FEE_DECIMALS = 18;
 
     /**
-     * @dev Set the underlying asset contract. Set all starting positions. Set price router.
+     * @dev Set the underlying asset contract. Set all starting protocols. Set price router.
      */
     constructor(
         address _asset,
         string memory _name,
         string memory _symbol,
-        address[] memory _positions,
+        address[] memory _protocols,
+        DataTypes.ProtocolSelectors[] memory _protocolSelectors,
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _router,
-        address[] memory _whitelist,
         uint256 _poolLimit
     )
         ERC4626(IERC20(_asset))
         ERC20(_name, _symbol)
-        Registry(_positions, _iTokens, _rebalanceMatrixProvider, _router, _whitelist, _poolLimit)
+        Registry(_protocols, _protocolSelectors, _iTokens, _rebalanceMatrixProvider, _router, _poolLimit)
     {
         _setFee(0.1 * 1e18, 0.001 * 1e18);
         _setFeeTreasury(msg.sender);
@@ -112,7 +112,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @param   distributionMatrix  transactions which contract should execute
      * NOTE: should revert if can't fullfit all requested withdrawals.
      */
-    function rebalance(DataTypes.AdaptorCall[] memory distributionMatrix) external nonReentrant onlyRebalanceProvider {
+    function rebalance(DataTypes.AdaptorCall[] calldata distributionMatrix) external nonReentrant onlyRebalanceProvider {
         uint256 balanceBefore = totalAssets();
         _executeTransactions(distributionMatrix);
         uint256 balanceAfter = totalAssets();
@@ -205,7 +205,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address receiver,
         uint256 assets,
         uint256 shares
-    ) internal virtual override whenNotDepositsPause onlyWhitelisted nonReentrant {
+    ) internal virtual override whenNotDepositsPause nonReentrant {
         require(totalAssets() + assets <= poolLimitSize, "Pool limit exceeded");
         require(maxWithdraw(msg.sender) + assets <= userDepositLimit, "User deposit limit exceeded");
         depositsAfterFeeClaim += assets;
@@ -252,14 +252,29 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         }
     }
 
+    function _isExecuteLegal(DataTypes.AdaptorCall calldata data) private returns (bool) {
+        if (data.adaptor == asset()) {
+            (bytes4 selector) = bytes4(data.callData[:4]);
+            (address spender,) = abi.decode(data.callData[4:], (address, uint256));
+            return selector == IERC20.approve.selector && isProtocol[spender];
+        }
+
+        if (isProtocol[data.adaptor]) {
+            (bytes4 selector) = bytes4(data.callData[:4]);
+            DataTypes.ProtocolSelectors memory adaptorSelectors = protocolSelectors[data.adaptor];
+            return selector == adaptorSelectors.deposit || selector == adaptorSelectors.withdraw;
+        }
+
+        return false;
+    }
+
     /**
      * @notice  executes the list of transactions for autocompound or rebalance
      */
-    function _executeTransactions(DataTypes.AdaptorCall[] memory _matrix) internal {
+    function _executeTransactions(DataTypes.AdaptorCall[] calldata _matrix) internal {
         for (uint8 i = 0; i < _matrix.length; ++i) {
-            address adaptor = _matrix[i].adaptor;
-            require(isAdaptorSetup[adaptor]);
-            (bool success, ) = adaptor.call(_matrix[i].callData);
+            require(_isExecuteLegal(_matrix[i]), "Illegal execute");
+            (bool success, ) = _matrix[i].adaptor.call(_matrix[i].callData);
             require(success, "Transaction failed.");
         }
     }
