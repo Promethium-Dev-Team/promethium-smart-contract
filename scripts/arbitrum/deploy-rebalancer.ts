@@ -21,29 +21,195 @@ let rebalanceProviders: string[] = [
 
 let protocols: string[][] = [
     [
+        "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
         "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
         "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
-        "0x794a61358D6845594F94dc1DB02A252b5b4814aD", //usdt
+        "0xB65Ab7e1c6c1Ba202baed82d6FB71975D56F007C",
+        "0x9365181A7df82a1cC578eAE443EFd89f00dbb643",
+        "0xf52f079Af080C9FB5AFCA57DDE0f8B83d49692a9",
+        "0x4A5806A3c4fBB32F027240F80B18b26E40BF7E31",
     ],
     [
+        "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
         "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
         "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
-        "0x794a61358D6845594F94dc1DB02A252b5b4814aD", //usdc.e
+        "0x2Bf852e22C92Fd790f4AE54A76536c8C4217786b",
+        "0x1ca530f02DD0487cef4943c674342c5aEa08922F",
+        "0x8dc3312c68125a94916d62B97bb5D925f84d4aE0",
+        "0xa5edbdd9646f8dff606d7448e414884c7d905dca",
+        "0x068485a0f964B4c3D395059a19A05a8741c48B4E",
     ],
     [
+        "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
         "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
         "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
-        "0x794a61358D6845594F94dc1DB02A252b5b4814aD", //wbtc
+        "0x3393cD223f59F32CC0cC845DE938472595cA48a1",
+        "0xC37896BF3EE5a2c62Cdbd674035069776f721668",
+        "0xD3204E4189BEcD9cD957046A8e4A643437eE0aCC",
+        "0x0A2f8B6223EB7DE26c810932CCA488A4936cF391",
     ],
     [
+        "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
         "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
-        "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
-        "0x794a61358D6845594F94dc1DB02A252b5b4814aD", //weth
+        "0x242f91207184FCc220beA3c9E5f22b6d80F3faC5", //weth
     ],
     [
+        "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
         "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
+        "0xD037c36dbc81a8890728D850E080e38F6EeB95EF", //arb
         "0x102442A3BA1e441043154Bc0B8A2e2FB5E0F94A7",
-        "0x794a61358D6845594F94dc1DB02A252b5b4814aD", //arb
+        "0x8991d64fe388fA79A4f7Aa7826E8dA09F0c3C96a",
+        "0xC6121d58E01B3F5C88EB8a661770DB0046523539",
+    ],
+];
+
+const protocolSelectors = [
+    [
+        {
+            // Aave V3
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            // WePiggy
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            // dForce
+            deposit: "0x40c10f19",
+            withdraw: "0x96294178",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+    ],
+    [
+        {
+            // Aave V3
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            // WePiggy
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            // dForce
+            deposit: "0x40c10f19",
+            withdraw: "0x96294178",
+        },
+        {
+            // Compound
+            deposit: "0xf2b9fdb8",
+            withdraw: "0xf3fef3a3",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+    ],
+    [
+        {
+            // Aave V3
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            // WePiggy
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            // dForce
+            deposit: "0x40c10f19",
+            withdraw: "0x96294178",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+    ],
+    [
+        {
+            // Aave V3
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+    ],
+    [
+        {
+            // Aave V3
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            // dForce
+            deposit: "0x40c10f19",
+            withdraw: "0x96294178",
+        },
+        {
+            deposit: "0xe8eda9df",
+            withdraw: "0x69328dec",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
+        {
+            deposit: "0xa0712d68",
+            withdraw: "0x852a12e3",
+        },
     ],
 ];
 
@@ -68,11 +234,12 @@ let ibTokens: string[][] = [
         "0x068485a0f964B4c3D395059a19A05a8741c48B4E",
     ],
     [
-        "0x727354712BDFcd8596a3852Fd2065b3C34F4F770",
-        "0x3393cD223f59F32CC0cC845DE938472595cA48a1",
-        "0x731e2246A0c67b1B19188C7019094bA9F107404f",
         "0x078f358208685046a11C85e8ad32895DED33A249",
+        "0x727354712BDFcd8596a3852Fd2065b3C34F4F770",
+        "0x731e2246A0c67b1B19188C7019094bA9F107404f",
+        "0x3393cD223f59F32CC0cC845DE938472595cA48a1",
         "0xC37896BF3EE5a2c62Cdbd674035069776f721668",
+        "0xD3204E4189BEcD9cD957046A8e4A643437eE0aCC",
         "0x0A2f8B6223EB7DE26c810932CCA488A4936cF391",
     ],
     [
@@ -90,12 +257,6 @@ let ibTokens: string[][] = [
     ],
 ];
 
-let whitelist: string[] = [
-    "0x3597C1B68ea0185530fFe29b84C9E56c8eae46D1",
-    "0x0ba2AdA8c803e85f1881E60B4Ad04C2962089956",
-    "0xff5a640A3e5f5A1a3b08B0841e069e255f76D3C7",
-];
-
 let poolLimits: BigNumber[] = [
     ethers.utils.parseUnits("5000", 6), //5000 USDT
     ethers.utils.parseUnits("5000", 6), //5000 USDC
@@ -104,24 +265,20 @@ let poolLimits: BigNumber[] = [
     ethers.utils.parseUnits("5000", 18), //5000 ARB
 ];
 
-let priceRouter: string = "0xbd2120c7dd88f564a8850050621b3af608a7b685";
+let priceRouter: string = "0x92e69cc96ae8b61161bee4a567256be501140350";
 
 async function main() {
+    const [signer] = await ethers.getSigners();
     for (let i = 0; i < assets.length; i++) {
-        const [signer] = await ethers.getSigners();
-        let positions = protocols[i];
-        positions.push(assets[i]);
-        let protocolIbTokens = ibTokens[i];
-
         const rebalancer = await new Rebalancer__factory(signer).deploy(
             assets[i],
             names[i],
             symbols[i],
-            positions,
-            protocolIbTokens,
+            protocols[i],
+            protocolSelectors[i],
+            ibTokens[i],
             rebalanceProviders[i],
             priceRouter,
-            whitelist,
             poolLimits[i],
         );
 
