@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.21;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./Registry.sol";
 
-contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
+contract Rebalancer is ERC4626Upgradeable, Registry, ReentrancyGuardUpgradeable {
     event Rebalance();
     event FeesChanged(address owner, DataTypes.feeData newFeeData);
     event FeesCharged(address treasury, uint256 amount);
@@ -32,7 +32,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
     /**
      * @dev Set the underlying asset contract. Set all starting protocols. Set price router.
      */
-    constructor(
+    function initialize(
         address _asset,
         string memory _name,
         string memory _symbol,
@@ -41,14 +41,16 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _router,
-        uint256 _poolLimit
+        uint256 _poolLimit,
+        address admin
     )
-        ERC4626(IERC20(_asset))
-        ERC20(_name, _symbol)
-        Registry(_protocols, _protocolSelectors, _iTokens, _rebalanceMatrixProvider, _router, _poolLimit)
+        initializer external
     {
+        __ERC4626_init(IERC20Upgradeable(_asset));
+        __ERC20_init(_name, _symbol);
+        __Registry_init(_protocols, _protocolSelectors, _iTokens, _rebalanceMatrixProvider, _router, _poolLimit, admin);
         _setFee(0.1 * 1e18, 0.001 * 1e18);
-        _setFeeTreasury(msg.sender);
+        _setFeeTreasury(admin);
     }
 
     /**
@@ -103,7 +105,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
      * @return  uint256  amount of available tokens
      */
     function maxWithdraw(address owner) public view override returns (uint256) {
-        return _convertToAssets(maxRedeem(owner), Math.Rounding.Down);
+        return _convertToAssets(maxRedeem(owner), MathUpgradeable.Rounding.Down);
     }
 
     /**
@@ -236,7 +238,7 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
 
         assets -= withdrawFee;
         _burn(withdrawer, shares);
-        SafeERC20.safeTransfer(IERC20(asset()), withdrawer, assets);
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset()), withdrawer, assets);
 
         emit WithdrawRequested(id, assets);
     }
@@ -291,4 +293,6 @@ contract Rebalancer is ERC4626, Registry, ReentrancyGuard {
         delete withdrawQueue;
         totalRequested = 0;
     }
+
+    uint256[50] private __gap;
 }

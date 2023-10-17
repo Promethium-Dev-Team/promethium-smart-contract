@@ -1,7 +1,7 @@
-import {ethers} from "hardhat";
+import {ethers, upgrades} from "hardhat";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {ERC20token, InterestBearning, PriceRouterMock, Registry, Registry__factory} from "../typechain-types";
+import {ERC20token, InterestBearning, PriceRouterMock, Registry} from "../typechain-types";
 import {ERC20token__factory} from "../typechain-types";
 import {InterestBearning__factory} from "../typechain-types";
 import {PriceRouterMock__factory} from "../typechain-types";
@@ -76,14 +76,15 @@ describe("Registry contract", async () => {
     beforeEach(async () => {
         REBALANCE_PROVIDER_ROLE = "0x524542414c414e43455f50524f56494445525f524f4c45000000000000000000";
 
-        Registry = await new Registry__factory(owner).deploy(
-            protocols,
-            protocolSelectors,
-            iTokens,
-            rebalanceMatrixProvider.address,
-            priceRouter.address,
-            poolLimit,
-        );
+        Registry = (await upgrades.deployProxy(
+            await ethers.getContractFactory("Registry"),
+            [protocols, protocolSelectors, iTokens, rebalanceMatrixProvider.address, priceRouter.address, poolLimit, owner.address],
+            {
+                kind: "uups",
+                initializer:
+                    "initialize(address[] memory, struct(bytes4, bytes4)[] memory, address[] memory, address, address, uint256, address)",
+            },
+        )) as Registry;
     });
 
     describe("Deployment", async () => {

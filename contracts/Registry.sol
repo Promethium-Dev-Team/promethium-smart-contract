@@ -18,7 +18,7 @@ contract Registry is RBAC {
 
     bool public depositsPaused;
 
-    IPriceRouter public immutable router;
+    IPriceRouter public router;
 
     uint256 public poolLimitSize;
     uint256 public userDepositLimit;
@@ -35,14 +35,48 @@ contract Registry is RBAC {
     event SetUserDepositLimit(uint256 newLimit);
     event SetDepositsPaused(bool depositsPaused);
 
-    constructor(
+    function initialize(
         address[] memory _protocols,
         DataTypes.ProtocolSelectors[] memory _protocolSelectors,
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _priceRouter,
-        uint256 _poolLimit
-    ) {
+        uint256 _poolLimit,
+        address admin
+    ) initializer external {
+        __RBAC_init(admin);
+
+        require(_protocols.length == _protocolSelectors.length, "Mismatch _protocols and _protocolSelectors arrays lengths");
+        require(_rebalanceMatrixProvider != address(0), "Rebalance provider address can't be address zero");
+        require(_priceRouter != address(0), "Price router address can't be address zero");
+
+        router = IPriceRouter(_priceRouter);
+
+        for (uint i = 0; i < _protocols.length; i++) {
+            addProtocol(_protocols[i], _protocolSelectors[i]);
+        }
+
+        for (uint i = 0; i < _iTokens.length; i++) {
+            addIToken(_iTokens[i]);
+        }
+
+        _grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
+
+        _setPoolLimit(_poolLimit);
+        _setUserDepositLimit(_poolLimit / 50);
+    }
+
+    function __Registry_init(
+        address[] memory _protocols,
+        DataTypes.ProtocolSelectors[] memory _protocolSelectors,
+        address[] memory _iTokens,
+        address _rebalanceMatrixProvider,
+        address _priceRouter,
+        uint256 _poolLimit,
+        address admin
+    ) internal onlyInitializing {
+        __RBAC_init(admin);
+
         require(_protocols.length == _protocolSelectors.length, "Mismatch _protocols and _protocolSelectors arrays lengths");
         require(_rebalanceMatrixProvider != address(0), "Rebalance provider address can't be address zero");
         require(_priceRouter != address(0), "Price router address can't be address zero");
@@ -165,4 +199,6 @@ contract Registry is RBAC {
 
         emit SetUserDepositLimit(newLimit);
     }
+
+    uint256[50] private __gap;
 }

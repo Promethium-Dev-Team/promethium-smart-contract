@@ -1,7 +1,7 @@
-import {ethers} from "hardhat";
+import {ethers, upgrades} from "hardhat";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {RBAC__factory, RBAC} from "../typechain-types";
+import {RBAC} from "../typechain-types";
 
 describe("RBAC contract", async () => {
     let RBAC: RBAC;
@@ -20,7 +20,7 @@ describe("RBAC contract", async () => {
     });
 
     beforeEach(async () => {
-        RBAC = await new RBAC__factory(owner).deploy();
+        RBAC = (await upgrades.deployProxy(await ethers.getContractFactory("RBAC"), [owner.address], {kind: "uups", initializer: "initialize(address)"})) as RBAC;
     });
 
     describe("Deployment", async () => {

@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.21;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract RBAC is AccessControl {
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+contract RBAC is AccessControlUpgradeable, UUPSUpgradeable {
+    function initialize(address admin) initializer external {
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    }
+
+    function __RBAC_init(address admin) internal onlyInitializing {
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     bytes32 public constant REBALANCE_PROVIDER_ROLE =
@@ -20,4 +29,8 @@ contract RBAC is AccessControl {
         require(hasRole(REBALANCE_PROVIDER_ROLE, msg.sender), "Caller is not a rabalance provider");
         _;
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
+
+    uint256[50] private __gap;
 }

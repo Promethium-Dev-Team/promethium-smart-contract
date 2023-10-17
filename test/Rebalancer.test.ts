@@ -1,17 +1,10 @@
-import {ethers} from "hardhat";
+import {ethers, upgrades} from "hardhat";
 import {BigNumber, constants} from "ethers";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {
-    ERC20token,
-    ERC20token__factory,
-    InterestBearning,
-    PriceRouterMock,
-    Rebalancer
-} from "../typechain-types";
+import {ERC20token, ERC20token__factory, InterestBearning, PriceRouterMock, Rebalancer} from "../typechain-types";
 import {InterestBearning__factory} from "../typechain-types";
 import {PriceRouterMock__factory} from "../typechain-types";
-import {Rebalancer__factory} from "../typechain-types";
 
 describe("Rebalancer contract", async () => {
     let Rebalancer: Rebalancer;
@@ -40,8 +33,8 @@ describe("Rebalancer contract", async () => {
     let allreadyAddedPositionRevertString: string;
 
     let protocols: string[] = [];
-    let PROTOCOL_SELECTOR: {deposit: string; withdraw: string;};
-    let protocolSelectors: {deposit: string; withdraw: string;}[] = [];
+    let PROTOCOL_SELECTOR: {deposit: string; withdraw: string};
+    let protocolSelectors: {deposit: string; withdraw: string}[] = [];
     let iTokens: string[] = [];
 
     let protocolsAmountLimit: number;
@@ -78,9 +71,9 @@ describe("Rebalancer contract", async () => {
 
         protocols = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
         PROTOCOL_SELECTOR = {
-            deposit: Aave.interface.getSighash('deposit'),
-            withdraw: Aave.interface.getSighash('withdraw')
-        }
+            deposit: Aave.interface.getSighash("deposit"),
+            withdraw: Aave.interface.getSighash("withdraw"),
+        };
         protocolSelectors = protocols.map(() => PROTOCOL_SELECTOR);
         iTokens = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
 
@@ -96,17 +89,26 @@ describe("Rebalancer contract", async () => {
 
     beforeEach(async () => {
         REBALANCE_PROVIDER_ROLE = "0x524542414c414e43455f50524f56494445525f524f4c45000000000000000000";
-        Rebalancer = await new Rebalancer__factory(owner).deploy(
-            USDT.address,
-            "Promethium USDT",
-            "USDT Share",
-            protocols,
-            protocolSelectors,
-            iTokens,
-            rebalanceMatrixProvider.address,
-            priceRouter.address,
-            poolSizeLimit,
-        );
+        Rebalancer = (await upgrades.deployProxy(
+            await ethers.getContractFactory("Rebalancer"),
+            [
+                USDT.address,
+                "Promethium USDT",
+                "USDT Share",
+                protocols,
+                protocolSelectors,
+                iTokens,
+                rebalanceMatrixProvider.address,
+                priceRouter.address,
+                poolSizeLimit,
+                owner.address,
+            ],
+            {
+                kind: "uups",
+                initializer:
+                    "initialize(address, string memory, string memory, address[] memory, struct(bytes4,bytes4)[] memory, address[] memory, address, address, uint256, address)",
+            },
+        )) as Rebalancer;
     });
 
     describe("Deployment", async () => {
@@ -550,7 +552,6 @@ describe("Rebalancer contract", async () => {
         it("Should not allow to add itoken if the router does not support it", async () => {
             await expect(Rebalancer.connect(owner).addIToken(ethers.constants.AddressZero)).to.be.revertedWith("Not supported token");
         });
-
     });
 
     describe("Set fee function", async () => {
