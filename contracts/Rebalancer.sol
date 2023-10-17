@@ -41,16 +41,15 @@ contract Rebalancer is ERC4626Upgradeable, Registry, ReentrancyGuardUpgradeable 
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _router,
-        uint256 _poolLimit,
-        address admin
+        uint256 _poolLimit
     )
         initializer external
     {
         __ERC4626_init(IERC20Upgradeable(_asset));
         __ERC20_init(_name, _symbol);
-        __Registry_init(_protocols, _protocolSelectors, _iTokens, _rebalanceMatrixProvider, _router, _poolLimit, admin);
+        __Registry_init(_protocols, _protocolSelectors, _iTokens, _rebalanceMatrixProvider, _router, _poolLimit);
         _setFee(0.1 * 1e18, 0.001 * 1e18);
-        _setFeeTreasury(admin);
+        _setFeeTreasury(msg.sender);
     }
 
     /**

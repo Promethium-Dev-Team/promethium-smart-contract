@@ -20,7 +20,7 @@ describe("RBAC contract", async () => {
     });
 
     beforeEach(async () => {
-        RBAC = (await upgrades.deployProxy(await ethers.getContractFactory("RBAC"), [owner.address], {kind: "uups", initializer: "initialize(address)"})) as RBAC;
+        RBAC = (await upgrades.deployProxy(await ethers.getContractFactory("RBAC"), [], {kind: "uups", initializer: "initialize()"})) as RBAC;
     });
 
     describe("Deployment", async () => {

@@ -1,6 +1,6 @@
-import {ethers} from "hardhat";
+import {ethers, upgrades} from "hardhat";
 import {BigNumber} from "ethers";
-import {Rebalancer__factory} from "../../typechain-types";
+import {Rebalancer} from "../../typechain-types";
 
 let assets: string[] = [
     "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", //USDT
@@ -260,30 +260,44 @@ let ibTokens: string[][] = [
 let poolLimits: BigNumber[] = [
     ethers.utils.parseUnits("5000", 6), //5000 USDT
     ethers.utils.parseUnits("5000", 6), //5000 USDC
-    ethers.utils.parseUnits("3", 17), //0.3 WBTC
-    ethers.utils.parseUnits("3", 18), //3 WETH
-    ethers.utils.parseUnits("5000", 18), //5000 ARB
+    ethers.utils.parseUnits("1753", 4), //0.1753 WBTC
+    ethers.utils.parseUnits("3157", 15), //3.157 WETH
+    ethers.utils.parseUnits("6300", 18), //6300 ARB
 ];
 
 let priceRouter: string = "0x92e69cc96ae8b61161bee4a567256be501140350";
+const owner: string = "0x8a41dE1686942fdC9d3dfac37Ed52961F4F79d3C";
 
 async function main() {
     const [signer] = await ethers.getSigners();
     for (let i = 0; i < assets.length; i++) {
-        const rebalancer = await new Rebalancer__factory(signer).deploy(
-            assets[i],
-            names[i],
-            symbols[i],
-            protocols[i],
-            protocolSelectors[i],
-            ibTokens[i],
-            rebalanceProviders[i],
-            priceRouter,
-            poolLimits[i],
-        );
+        const rebalancer = (await upgrades.deployProxy(
+            await ethers.getContractFactory("Rebalancer"),
+            [
+                assets[i],
+                names[i],
+                symbols[i],
+                protocols[i],
+                protocolSelectors[i],
+                ibTokens[i],
+                rebalanceProviders[i],
+                priceRouter,
+                poolLimits[i]
+            ],
+            {
+                kind: "uups",
+                initializer:
+                    "initialize(address, string memory, string memory, address[] memory, struct(bytes4,bytes4)[] memory, address[] memory, address, address, uint256)",
+            },
+        )) as Rebalancer;
+
+        await rebalancer.setFeeTreasury(owner).then((tx) => tx.wait());
+        await rebalancer.grantRole(rebalancer.DEFAULT_ADMIN_ROLE(), owner).then((tx) => tx.wait());
+        await rebalancer.revokeRole(rebalancer.DEFAULT_ADMIN_ROLE(), signer.address).then((tx) => tx.wait());
 
         console.log(names[i]);
         console.log(rebalancer.address);
+        console.log(rebalancer.deployTransaction.blockNumber);
     }
 }
 

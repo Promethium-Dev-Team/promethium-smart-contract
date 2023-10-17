@@ -41,10 +41,9 @@ contract Registry is RBAC {
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _priceRouter,
-        uint256 _poolLimit,
-        address admin
+        uint256 _poolLimit
     ) initializer external {
-        __RBAC_init(admin);
+        __RBAC_init();
 
         require(_protocols.length == _protocolSelectors.length, "Mismatch _protocols and _protocolSelectors arrays lengths");
         require(_rebalanceMatrixProvider != address(0), "Rebalance provider address can't be address zero");
@@ -72,10 +71,9 @@ contract Registry is RBAC {
         address[] memory _iTokens,
         address _rebalanceMatrixProvider,
         address _priceRouter,
-        uint256 _poolLimit,
-        address admin
+        uint256 _poolLimit
     ) internal onlyInitializing {
-        __RBAC_init(admin);
+        __RBAC_init();
 
         require(_protocols.length == _protocolSelectors.length, "Mismatch _protocols and _protocolSelectors arrays lengths");
         require(_rebalanceMatrixProvider != address(0), "Rebalance provider address can't be address zero");

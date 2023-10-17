@@ -78,11 +78,11 @@ describe("Registry contract", async () => {
 
         Registry = (await upgrades.deployProxy(
             await ethers.getContractFactory("Registry"),
-            [protocols, protocolSelectors, iTokens, rebalanceMatrixProvider.address, priceRouter.address, poolLimit, owner.address],
+            [protocols, protocolSelectors, iTokens, rebalanceMatrixProvider.address, priceRouter.address, poolLimit],
             {
                 kind: "uups",
                 initializer:
-                    "initialize(address[] memory, struct(bytes4, bytes4)[] memory, address[] memory, address, address, uint256, address)",
+                    "initialize(address[] memory, struct(bytes4, bytes4)[] memory, address[] memory, address, address, uint256)",
             },
         )) as Registry;
     });

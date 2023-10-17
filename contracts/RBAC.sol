@@ -5,16 +5,16 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract RBAC is AccessControlUpgradeable, UUPSUpgradeable {
-    function initialize(address admin) initializer external {
+    function initialize() initializer external {
         __AccessControl_init();
         __UUPSUpgradeable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function __RBAC_init(address admin) internal onlyInitializing {
+    function __RBAC_init() internal onlyInitializing {
         __AccessControl_init();
         __UUPSUpgradeable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     bytes32 public constant REBALANCE_PROVIDER_ROLE =

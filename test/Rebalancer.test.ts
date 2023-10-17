@@ -27,7 +27,6 @@ describe("Rebalancer contract", async () => {
     let rebalanceMatrixProvider: SignerWithAddress;
 
     let REBALANCE_PROVIDER_ROLE: string;
-    let AUTOCOMPOUND_PROVIDER_ROLE: string;
 
     let notOwnerRevertString: string;
     let allreadyAddedPositionRevertString: string;
@@ -101,12 +100,11 @@ describe("Rebalancer contract", async () => {
                 rebalanceMatrixProvider.address,
                 priceRouter.address,
                 poolSizeLimit,
-                owner.address,
             ],
             {
                 kind: "uups",
                 initializer:
-                    "initialize(address, string memory, string memory, address[] memory, struct(bytes4,bytes4)[] memory, address[] memory, address, address, uint256, address)",
+                    "initialize(address, string memory, string memory, address[] memory, struct(bytes4,bytes4)[] memory, address[] memory, address, address, uint256)",
             },
         )) as Rebalancer;
     });
