@@ -35,36 +35,6 @@ contract Registry is RBAC {
     event SetUserDepositLimit(uint256 newLimit);
     event SetDepositsPaused(bool depositsPaused);
 
-    function initialize(
-        address[] memory _protocols,
-        DataTypes.ProtocolSelectors[] memory _protocolSelectors,
-        address[] memory _iTokens,
-        address _rebalanceMatrixProvider,
-        address _priceRouter,
-        uint256 _poolLimit
-    ) initializer external {
-        __RBAC_init();
-
-        require(_protocols.length == _protocolSelectors.length, "Mismatch _protocols and _protocolSelectors arrays lengths");
-        require(_rebalanceMatrixProvider != address(0), "Rebalance provider address can't be address zero");
-        require(_priceRouter != address(0), "Price router address can't be address zero");
-
-        router = IPriceRouter(_priceRouter);
-
-        for (uint i = 0; i < _protocols.length; i++) {
-            addProtocol(_protocols[i], _protocolSelectors[i]);
-        }
-
-        for (uint i = 0; i < _iTokens.length; i++) {
-            addIToken(_iTokens[i]);
-        }
-
-        _grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
-
-        _setPoolLimit(_poolLimit);
-        _setUserDepositLimit(_poolLimit / 50);
-    }
-
     function __Registry_init(
         address[] memory _protocols,
         DataTypes.ProtocolSelectors[] memory _protocolSelectors,
@@ -92,7 +62,7 @@ contract Registry is RBAC {
         _grantRole(REBALANCE_PROVIDER_ROLE, _rebalanceMatrixProvider);
 
         _setPoolLimit(_poolLimit);
-        _setUserDepositLimit(_poolLimit / 50);
+        _setUserDepositLimit(_poolLimit / 10);
     }
 
     /**

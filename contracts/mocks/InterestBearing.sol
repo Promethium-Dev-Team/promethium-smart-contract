@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract interestBearning is ERC20 {
+contract InterestBearing is ERC20 {
     struct userInfo {
         bool isHolder;
         uint256 lastCalculated;

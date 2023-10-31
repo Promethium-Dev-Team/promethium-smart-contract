@@ -127,7 +127,7 @@ contract Rebalancer is ERC4626Upgradeable, Registry, ReentrancyGuardUpgradeable 
     }
 
     /**
-     * @notice  allows user to request the token withdrawal if the amount of underlying asset is not enougth on the vault
+     * @notice  allows user to request the token withdrawal if the amount of underlying asset is not enough on the vault
      * @dev     shares shouldn't be burned but user can't use them in any other way
      * @param   shares  amount of shares user will redeem during next rebalance
      */

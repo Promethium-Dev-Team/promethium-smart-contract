@@ -1,115 +1,14 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x63b060A9dB4ED5F2B5D1FFe11629Cbde3A6be2ce",
-    "txHash": "0xabff8abc09ba5ba8db2bfa524fa55391a39387cce076d8c07fb78bdf1abf56df"
+    "address": "0x904C9d98Cca1228A5DF31Bcc94686929326f691A",
+    "txHash": "0x8364253229e49dae2428226dbfdc24464b19633cddc36a1ad7f4ef81d149d7bd"
   },
   "proxies": [],
   "impls": {
-    "a86db52262863a40160d7e976e97e0d903c33e0d46309468d1ef9af4821544e3": {
-      "address": "0x133e1B2fb3f67D360d26C1888aabad8b38e3B3b1",
-      "txHash": "0xe4882e562e3f2f22694dbaffe1e14ebd2fdab80a98036f1eba46d386cbdc4d04",
-      "layout": {
-        "storage": [
-          {
-            "contract": "Initializable",
-            "label": "_initialized",
-            "type": "t_uint8",
-            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "contract": "Initializable",
-            "label": "_initializing",
-            "type": "t_bool",
-            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:68"
-          },
-          {
-            "contract": "ERC1967UpgradeUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\ERC1967\\ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "contract": "UUPSUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\UUPSUpgradeable.sol:111"
-          },
-          {
-            "contract": "ContextUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
-          },
-          {
-            "contract": "OwnableUpgradeable",
-            "label": "_owner",
-            "type": "t_address",
-            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
-          },
-          {
-            "contract": "OwnableUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)49_storage",
-            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
-          },
-          {
-            "contract": "PriceRouter",
-            "label": "usdt",
-            "type": "t_address",
-            "src": "contracts\\priceRouters\\PriceRouter.sol:17"
-          },
-          {
-            "contract": "PriceRouter",
-            "label": "usdc_e",
-            "type": "t_address",
-            "src": "contracts\\priceRouters\\PriceRouter.sol:18"
-          },
-          {
-            "contract": "PriceRouter",
-            "label": "wbtc",
-            "type": "t_address",
-            "src": "contracts\\priceRouters\\PriceRouter.sol:19"
-          },
-          {
-            "contract": "PriceRouter",
-            "label": "weth",
-            "type": "t_address",
-            "src": "contracts\\priceRouters\\PriceRouter.sol:20"
-          },
-          {
-            "contract": "PriceRouter",
-            "label": "arb",
-            "type": "t_address",
-            "src": "contracts\\priceRouters\\PriceRouter.sol:21"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]"
-          },
-          "t_uint256": {
-            "label": "uint256"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]"
-          },
-          "t_uint8": {
-            "label": "uint8"
-          },
-          "t_bool": {
-            "label": "bool"
-          }
-        }
-      }
-    },
-    "b33f85aaf16d6e7e240a3de07019065b6e0d9160464cd0a5722580eac44f5951": {
-      "address": "0x26453cF94AaE564684b6706496782D293dB9556E",
-      "txHash": "0x5e8f6247de23d975fa1e2fd8d861120142fea189b997429a2a369acc644dfcef",
+    "7a9f3317e2ae5d4bd25c29332e54475c5fd49b978a76ba42ab044f4d43647538": {
+      "address": "0x282132FDaeDf9aA9AaC27F7e1AA7D067491CE516",
+      "txHash": "0x83dd426a83aa492b76ed18677be0dac32de835f9e0f94d3df2f707e62316b8c7",
       "layout": {
         "storage": [
           {
@@ -170,7 +69,7 @@
           {
             "contract": "ERC4626Upgradeable",
             "label": "_asset",
-            "type": "t_contract(IERC20Upgradeable)2020",
+            "type": "t_contract(IERC20Upgradeable)2152",
             "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol:54"
           },
           {
@@ -219,7 +118,7 @@
             "contract": "RBAC",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/RBAC.sol:35"
+            "src": "contracts/RBAC.sol:30"
           },
           {
             "contract": "Registry",
@@ -242,7 +141,7 @@
           {
             "contract": "Registry",
             "label": "router",
-            "type": "t_contract(IPriceRouter)6682",
+            "type": "t_contract(IPriceRouter)7992",
             "src": "contracts/Registry.sol:21"
           },
           {
@@ -272,14 +171,14 @@
           {
             "contract": "Registry",
             "label": "protocolSelectors",
-            "type": "t_mapping(t_address,t_struct(ProtocolSelectors)4956_storage)",
+            "type": "t_mapping(t_address,t_struct(ProtocolSelectors)5835_storage)",
             "src": "contracts/Registry.sol:28"
           },
           {
             "contract": "Registry",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/Registry.sol:203"
+            "src": "contracts/Registry.sol:171"
           },
           {
             "contract": "ReentrancyGuardUpgradeable",
@@ -296,7 +195,7 @@
           {
             "contract": "Rebalancer",
             "label": "FeeData",
-            "type": "t_struct(feeData)4944_storage",
+            "type": "t_struct(feeData)5823_storage",
             "src": "contracts/Rebalancer.sol:15"
           },
           {
@@ -314,372 +213,7 @@
           {
             "contract": "Rebalancer",
             "label": "withdrawQueue",
-            "type": "t_array(t_struct(withdrawRequest)4951_storage)dyn_storage",
-            "src": "contracts/Rebalancer.sol:19"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "withdrawalRequests",
-            "type": "t_uint256",
-            "src": "contracts/Rebalancer.sol:20"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "lastBalance",
-            "type": "t_uint256",
-            "src": "contracts/Rebalancer.sol:22"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "depositsAfterFeeClaim",
-            "type": "t_uint256",
-            "src": "contracts/Rebalancer.sol:23"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "withdrawalsAfterFeeClaim",
-            "type": "t_uint256",
-            "src": "contracts/Rebalancer.sol:24"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/Rebalancer.sol:297"
-          }
-        ],
-        "types": {
-          "t_struct(feeData)4944_storage": {
-            "label": "struct DataTypes.feeData",
-            "members": [
-              {
-                "label": "performanceFee",
-                "type": "t_uint64"
-              },
-              {
-                "label": "withdrawFee",
-                "type": "t_uint64"
-              },
-              {
-                "label": "treasury",
-                "type": "t_address"
-              }
-            ]
-          },
-          "t_uint64": {
-            "label": "uint64"
-          },
-          "t_address": {
-            "label": "address"
-          },
-          "t_uint256": {
-            "label": "uint256"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)"
-          },
-          "t_array(t_struct(withdrawRequest)4951_storage)dyn_storage": {
-            "label": "struct DataTypes.withdrawRequest[]"
-          },
-          "t_struct(withdrawRequest)4951_storage": {
-            "label": "struct DataTypes.withdrawRequest",
-            "members": [
-              {
-                "label": "receiver",
-                "type": "t_address"
-              },
-              {
-                "label": "shares",
-                "type": "t_uint256"
-              },
-              {
-                "label": "id",
-                "type": "t_uint256"
-              }
-            ]
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]"
-          },
-          "t_array(t_address)dyn_storage": {
-            "label": "address[]"
-          },
-          "t_bool": {
-            "label": "bool"
-          },
-          "t_contract(IPriceRouter)6682": {
-            "label": "contract IPriceRouter"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)"
-          },
-          "t_mapping(t_address,t_struct(ProtocolSelectors)4956_storage)": {
-            "label": "mapping(address => struct DataTypes.ProtocolSelectors)"
-          },
-          "t_struct(ProtocolSelectors)4956_storage": {
-            "label": "struct DataTypes.ProtocolSelectors",
-            "members": [
-              {
-                "label": "deposit",
-                "type": "t_bytes4"
-              },
-              {
-                "label": "withdraw",
-                "type": "t_bytes4"
-              }
-            ]
-          },
-          "t_bytes4": {
-            "label": "bytes4"
-          },
-          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
-            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
-          },
-          "t_bytes32": {
-            "label": "bytes32"
-          },
-          "t_struct(RoleData)34_storage": {
-            "label": "struct AccessControlUpgradeable.RoleData",
-            "members": [
-              {
-                "label": "members",
-                "type": "t_mapping(t_address,t_bool)"
-              },
-              {
-                "label": "adminRole",
-                "type": "t_bytes32"
-              }
-            ]
-          },
-          "t_contract(IERC20Upgradeable)2020": {
-            "label": "contract IERC20Upgradeable"
-          },
-          "t_uint8": {
-            "label": "uint8"
-          },
-          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
-            "label": "mapping(address => mapping(address => uint256))"
-          },
-          "t_string_storage": {
-            "label": "string"
-          },
-          "t_array(t_uint256)45_storage": {
-            "label": "uint256[45]"
-          }
-        }
-      }
-    },
-    "e61715eecc7a75c64f958b92892ff472d3b0e7971d0f6f81b840ce095c2c5174": {
-      "address": "0x1604D9a9401C705269434A5222873dB692a17BD9",
-      "txHash": "0x10e508f7e1aad542afc4c1e3bb2c0f80f2856221f97777a00f99f743fecdc452",
-      "layout": {
-        "storage": [
-          {
-            "contract": "Initializable",
-            "label": "_initialized",
-            "type": "t_uint8",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "contract": "Initializable",
-            "label": "_initializing",
-            "type": "t_bool",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
-          },
-          {
-            "contract": "ContextUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
-          },
-          {
-            "contract": "ERC20Upgradeable",
-            "label": "_balances",
-            "type": "t_mapping(t_address,t_uint256)",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:40"
-          },
-          {
-            "contract": "ERC20Upgradeable",
-            "label": "_allowances",
-            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:42"
-          },
-          {
-            "contract": "ERC20Upgradeable",
-            "label": "_totalSupply",
-            "type": "t_uint256",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:44"
-          },
-          {
-            "contract": "ERC20Upgradeable",
-            "label": "_name",
-            "type": "t_string_storage",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:46"
-          },
-          {
-            "contract": "ERC20Upgradeable",
-            "label": "_symbol",
-            "type": "t_string_storage",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:47"
-          },
-          {
-            "contract": "ERC20Upgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)45_storage",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:376"
-          },
-          {
-            "contract": "ERC4626Upgradeable",
-            "label": "_asset",
-            "type": "t_contract(IERC20Upgradeable)2020",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol:54"
-          },
-          {
-            "contract": "ERC4626Upgradeable",
-            "label": "_underlyingDecimals",
-            "type": "t_uint8",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol:55"
-          },
-          {
-            "contract": "ERC4626Upgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)49_storage",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol:267"
-          },
-          {
-            "contract": "ERC165Upgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
-          },
-          {
-            "contract": "AccessControlUpgradeable",
-            "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
-            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62"
-          },
-          {
-            "contract": "AccessControlUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)49_storage",
-            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:260"
-          },
-          {
-            "contract": "ERC1967UpgradeUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "contract": "UUPSUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
-          },
-          {
-            "contract": "RBAC",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/RBAC.sol:35"
-          },
-          {
-            "contract": "Registry",
-            "label": "protocols",
-            "type": "t_array(t_address)dyn_storage",
-            "src": "contracts/Registry.sol:16"
-          },
-          {
-            "contract": "Registry",
-            "label": "iTokens",
-            "type": "t_array(t_address)dyn_storage",
-            "src": "contracts/Registry.sol:17"
-          },
-          {
-            "contract": "Registry",
-            "label": "depositsPaused",
-            "type": "t_bool",
-            "src": "contracts/Registry.sol:19"
-          },
-          {
-            "contract": "Registry",
-            "label": "router",
-            "type": "t_contract(IPriceRouter)6672",
-            "src": "contracts/Registry.sol:21"
-          },
-          {
-            "contract": "Registry",
-            "label": "poolLimitSize",
-            "type": "t_uint256",
-            "src": "contracts/Registry.sol:23"
-          },
-          {
-            "contract": "Registry",
-            "label": "userDepositLimit",
-            "type": "t_uint256",
-            "src": "contracts/Registry.sol:24"
-          },
-          {
-            "contract": "Registry",
-            "label": "isProtocol",
-            "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/Registry.sol:26"
-          },
-          {
-            "contract": "Registry",
-            "label": "isIToken",
-            "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/Registry.sol:27"
-          },
-          {
-            "contract": "Registry",
-            "label": "protocolSelectors",
-            "type": "t_mapping(t_address,t_struct(ProtocolSelectors)4956_storage)",
-            "src": "contracts/Registry.sol:28"
-          },
-          {
-            "contract": "Registry",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/Registry.sol:201"
-          },
-          {
-            "contract": "ReentrancyGuardUpgradeable",
-            "label": "_status",
-            "type": "t_uint256",
-            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
-          },
-          {
-            "contract": "ReentrancyGuardUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)49_storage",
-            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:88"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "FeeData",
-            "type": "t_struct(feeData)4944_storage",
-            "src": "contracts/Rebalancer.sol:15"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "totalRequested",
-            "type": "t_uint256",
-            "src": "contracts/Rebalancer.sol:17"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "lockedShares",
-            "type": "t_mapping(t_address,t_uint256)",
-            "src": "contracts/Rebalancer.sol:18"
-          },
-          {
-            "contract": "Rebalancer",
-            "label": "withdrawQueue",
-            "type": "t_array(t_struct(withdrawRequest)4951_storage)dyn_storage",
+            "type": "t_array(t_struct(withdrawRequest)5830_storage)dyn_storage",
             "src": "contracts/Rebalancer.sol:19"
           },
           {
@@ -714,7 +248,7 @@
           }
         ],
         "types": {
-          "t_struct(feeData)4944_storage": {
+          "t_struct(feeData)5823_storage": {
             "label": "struct DataTypes.feeData",
             "members": [
               {
@@ -743,10 +277,10 @@
           "t_mapping(t_address,t_uint256)": {
             "label": "mapping(address => uint256)"
           },
-          "t_array(t_struct(withdrawRequest)4951_storage)dyn_storage": {
+          "t_array(t_struct(withdrawRequest)5830_storage)dyn_storage": {
             "label": "struct DataTypes.withdrawRequest[]"
           },
-          "t_struct(withdrawRequest)4951_storage": {
+          "t_struct(withdrawRequest)5830_storage": {
             "label": "struct DataTypes.withdrawRequest",
             "members": [
               {
@@ -775,16 +309,16 @@
           "t_bool": {
             "label": "bool"
           },
-          "t_contract(IPriceRouter)6672": {
+          "t_contract(IPriceRouter)7992": {
             "label": "contract IPriceRouter"
           },
           "t_mapping(t_address,t_bool)": {
             "label": "mapping(address => bool)"
           },
-          "t_mapping(t_address,t_struct(ProtocolSelectors)4956_storage)": {
+          "t_mapping(t_address,t_struct(ProtocolSelectors)5835_storage)": {
             "label": "mapping(address => struct DataTypes.ProtocolSelectors)"
           },
-          "t_struct(ProtocolSelectors)4956_storage": {
+          "t_struct(ProtocolSelectors)5835_storage": {
             "label": "struct DataTypes.ProtocolSelectors",
             "members": [
               {
@@ -819,7 +353,7 @@
               }
             ]
           },
-          "t_contract(IERC20Upgradeable)2020": {
+          "t_contract(IERC20Upgradeable)2152": {
             "label": "contract IERC20Upgradeable"
           },
           "t_uint8": {

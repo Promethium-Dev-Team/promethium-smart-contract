@@ -2,8 +2,8 @@ import {ethers, upgrades} from "hardhat";
 import {BigNumber, constants} from "ethers";
 import {expect} from "chai";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {ERC20token, ERC20token__factory, InterestBearning, PriceRouterMock, Rebalancer} from "../typechain-types";
-import {InterestBearning__factory} from "../typechain-types";
+import {ERC20token, ERC20token__factory, InterestBearing, PriceRouterMock, Rebalancer} from "../typechain-types";
+import {InterestBearing__factory} from "../typechain-types";
 import {PriceRouterMock__factory} from "../typechain-types";
 
 describe("Rebalancer contract", async () => {
@@ -11,11 +11,11 @@ describe("Rebalancer contract", async () => {
 
     let USDT: ERC20token;
     let USDC: ERC20token;
-    let Aave: InterestBearning;
-    let Tender: InterestBearning;
-    let Dolomite: InterestBearning;
-    let Impermax: InterestBearning;
-    let WePiggy: InterestBearning;
+    let Aave: InterestBearing;
+    let Tender: InterestBearing;
+    let Dolomite: InterestBearing;
+    let Impermax: InterestBearing;
+    let WePiggy: InterestBearing;
 
     let priceRouter: PriceRouterMock;
 
@@ -29,7 +29,7 @@ describe("Rebalancer contract", async () => {
     let REBALANCE_PROVIDER_ROLE: string;
 
     let notOwnerRevertString: string;
-    let allreadyAddedPositionRevertString: string;
+    let allreadyAddedProtocolRevertString: string;
 
     let protocols: string[] = [];
     let PROTOCOL_SELECTOR: {deposit: string; withdraw: string};
@@ -51,11 +51,11 @@ describe("Rebalancer contract", async () => {
         USDT = await new ERC20token__factory(bob).deploy("Tether USD", "USDT");
         USDC = await new ERC20token__factory(charlie).deploy("USD coint", "USDC");
 
-        Aave = await new InterestBearning__factory(bob).deploy(USDT.address, "AAVE Finance", "AAVE");
-        Tender = await new InterestBearning__factory(bob).deploy(USDT.address, "Tender Finance", "TEND");
-        Dolomite = await new InterestBearning__factory(bob).deploy(USDT.address, "Dolomite Finance", "DOLO");
-        Impermax = await new InterestBearning__factory(bob).deploy(USDT.address, "Impermax Finance", "IMP");
-        WePiggy = await new InterestBearning__factory(bob).deploy(USDT.address, "WEPiggy Finance", "PIG");
+        Aave = await new InterestBearing__factory(bob).deploy(USDT.address, "AAVE Finance", "AAVE");
+        Tender = await new InterestBearing__factory(bob).deploy(USDT.address, "Tender Finance", "TEND");
+        Dolomite = await new InterestBearing__factory(bob).deploy(USDT.address, "Dolomite Finance", "DOLO");
+        Impermax = await new InterestBearing__factory(bob).deploy(USDT.address, "Impermax Finance", "IMP");
+        WePiggy = await new InterestBearing__factory(bob).deploy(USDT.address, "WEPiggy Finance", "PIG");
 
         await USDT.connect(bob).transfer(Aave.address, ethers.utils.parseEther("100000"));
         await USDT.connect(bob).transfer(Tender.address, ethers.utils.parseEther("100000"));
@@ -66,7 +66,7 @@ describe("Rebalancer contract", async () => {
         priceRouter = await new PriceRouterMock__factory(bob).deploy();
 
         notOwnerRevertString = "Caller is not the owner";
-        allreadyAddedPositionRevertString = "Already added";
+        allreadyAddedProtocolRevertString = "Already added";
 
         protocols = [Aave.address, Tender.address, Dolomite.address, Impermax.address];
         PROTOCOL_SELECTOR = {

@@ -5,11 +5,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract RBAC is AccessControlUpgradeable, UUPSUpgradeable {
-    function initialize() initializer external {
-        __AccessControl_init();
-        __UUPSUpgradeable_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
 
     function __RBAC_init() internal onlyInitializing {
         __AccessControl_init();
